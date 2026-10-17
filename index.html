@@ -1818,14 +1818,47 @@
         });
       }
 
-      // Keep native scrollbar and key events synchronized
-      window.addEventListener('scroll', () => {
-        updateNavbarScrollState();
-        ScrollTrigger.update();
-        if (Math.abs(window.scrollY - currentScroll) > 12) {
-          targetScroll = window.scrollY;
-          currentScroll = window.scrollY;
+      // Control object driving the scene
+      const control = {
+        progress: 0,
+        started: false,
+      };
+
+      function updateScrollPhysics() {
+        const vh = window.innerHeight || 1;
+        const progress = window.scrollY / vh;
+        control.progress = progress;
+
+        const stage = progress > 1.55 ? 2 : progress > 0.7 ? 1 : 0;
+        if (stage !== currentStage) {
+          updateBackgroundGradient(stage);
         }
+      }
+
+      // Initial scroll and navbar state sync
+      updateScrollPhysics();
+      updateNavbarScrollState();
+
+      // Keep native scrollbar, mobile touch scroll and key events synchronized
+      window.addEventListener(
+        'scroll',
+        () => {
+          updateNavbarScrollState();
+          ScrollTrigger.update();
+          updateScrollPhysics();
+
+          const isSmoothScrolling = Math.abs(currentScroll - targetScroll) > 0.1;
+          if (!isSmoothScrolling || Math.abs(window.scrollY - currentScroll) > 12) {
+            targetScroll = window.scrollY;
+            currentScroll = window.scrollY;
+          }
+        },
+        { passive: true }
+      );
+
+      window.addEventListener('resize', () => {
+        updateScrollPhysics();
+        updateNavbarScrollState();
       });
 
       // Smooth in-page anchor scroll integration
@@ -1859,23 +1892,6 @@
         mousePos.x = 99;
         mousePos.y = 99;
       });
-
-      // Control object driving the scene
-      const control = {
-        progress: 0,
-        started: false,
-      };
-
-      function updateScrollPhysics() {
-        const vh = window.innerHeight || 1;
-        const progress = window.scrollY / vh;
-        control.progress = progress;
-
-        const stage = progress > 1.55 ? 2 : progress > 0.7 ? 1 : 0;
-        if (stage !== currentStage) {
-          updateBackgroundGradient(stage);
-        }
-      }
 
       function smoothScrollTick() {
         if (Math.abs(currentScroll - targetScroll) > 0.1) {
@@ -2218,6 +2234,7 @@
             // After 140 + 520ms reveal header + hero and trigger scene start
             setTimeout(() => {
               control.started = true;
+              updateScrollPhysics();
               revealHeroAndHeader();
             }, 520);
           }, 140);
@@ -2741,6 +2758,7 @@
             return;
           }
 
+          updateScrollPhysics();
           const progress = ctrl?.progress ?? 0;
 
           // Mode blend factors
