@@ -1,0 +1,2936 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Arte Bola Balões — Mais que balões. Pura arte.</title>
+    <meta name="description" content="Estúdio especializado em transformar balões em instalações artísticas, cenários e experiências visuais marcantes. Desde 1999 em Fortaleza, Ceará." />
+    <meta property="og:title" content="Arte Bola Balões — Mais que balões. Pura arte." />
+    <meta property="og:description" content="Criamos cenários únicos com cor, forma e imaginação para transformar celebrações em momentos inesquecíveis. Desde 1999 em Fortaleza, Ceará." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/images/logo.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600;700&family=Raleway:wght@400;500;600;700;900&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Three.js and GSAP Importmap -->
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+          "gsap": "https://cdn.jsdelivr.net/npm/gsap@3.15.0/index.js",
+          "gsap/ScrollTrigger": "https://cdn.jsdelivr.net/npm/gsap@3.15.0/ScrollTrigger.js",
+          "gsap/SplitText": "https://cdn.jsdelivr.net/npm/gsap@3.15.0/SplitText.js"
+        }
+      }
+    </script>
+
+    <style>
+      :root {
+        --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        --font-display: 'Space Grotesk', sans-serif;
+        --font-mono: 'JetBrains Mono', monospace;
+        --font-raleway: 'Raleway', sans-serif;
+        --accent-blue: #0e2ac5;
+      }
+
+      *, *::before, *::after {
+        box-sizing: border-box;
+      }
+
+      html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        background-color: #f7fafc;
+        color: #1a1a1a;
+        font-family: var(--font-sans);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        overflow-x: hidden;
+      }
+
+      /* Custom scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: rgba(14, 42, 197, 0.18);
+        border-radius: 99px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: rgba(14, 42, 197, 0.32);
+      }
+
+      /* Typography helpers */
+      .font-raleway { font-family: var(--font-raleway); }
+      .font-display { font-family: var(--font-display); }
+      .font-mono { font-family: var(--font-mono); }
+      .font-sans { font-family: var(--font-sans); }
+
+      /* Background gradient layer */
+      #bg-gradient {
+        position: fixed;
+        inset: 0;
+        z-index: -10;
+        pointer-events: none;
+        transition: background 1.2s cubic-bezier(0.65, 0, 0.35, 1);
+        background: radial-gradient(circle at center, #ffffff 0%, #ecefff 35%, #c2d1ff 100%);
+      }
+
+      /* Canvas container */
+      #canvas-container {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+      }
+      #webgl-canvas {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+
+      /* Glassmorphism helpers */
+      .glass-btn {
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        box-shadow: inset 0 1.5px 2px rgba(255, 255, 255, 0.7), 0 8px 30px rgba(0, 0, 0, 0.04);
+        transition: background-color 0.2s, transform 0.2s;
+      }
+      .glass-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+
+      .glass-pill {
+        background: rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-top: 1px solid rgba(255, 255, 255, 0.9);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.85);
+        border-left: 1px solid rgba(255, 255, 255, 0.1);
+        border-right: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: inset 0 1.5px 2px rgba(255, 255, 255, 0.7), 0 8px 30px rgba(0, 0, 0, 0.04);
+      }
+
+      .glass-card-ring {
+        background: linear-gradient(to bottom, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.1));
+        padding: 1px;
+        border-radius: 1.4rem;
+        box-shadow: 0 14px 40px -12px rgba(14, 42, 197, 0.18);
+        transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s;
+      }
+      .glass-card-ring:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 18px 48px -12px rgba(14, 42, 197, 0.24);
+      }
+      .glass-card-inner {
+        position: relative;
+        background: rgba(255, 255, 255, 0.25);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border-radius: 1.35rem;
+        overflow: hidden;
+      }
+      .card-top-sheen {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.9), transparent);
+      }
+
+      .blue-orb-gradient {
+        background: radial-gradient(circle at 50% 30%, #5175ff 0%, #0e2ac5 55%, #020b40 100%);
+      }
+
+      .dot-glow {
+        background: radial-gradient(circle at 35% 30%, #5175ff, #0e2ac5);
+        box-shadow: 0 0 8px rgba(47, 105, 255, 0.6);
+      }
+
+      /* Entrance and Reveal animations */
+      .reveal {
+        opacity: 0;
+        transform: translateY(42px);
+        filter: blur(8px);
+        transition: opacity 1.5s cubic-bezier(0.16, 1, 0.3, 1),
+                    transform 1.5s cubic-bezier(0.16, 1, 0.3, 1),
+                    filter 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+        will-change: opacity, transform, filter;
+      }
+      .reveal.is-revealed {
+        opacity: 1;
+        transform: translateY(0);
+        filter: blur(0);
+      }
+
+      /* Hero staggered elements */
+      .hero-item {
+        opacity: 0;
+        will-change: opacity, transform;
+      }
+      .hero-item.animate-in {
+        animation-fill-mode: forwards;
+        animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      @keyframes heroRise {
+        from {
+          opacity: 0;
+          transform: translateY(var(--rise-from, 20px));
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Marquee track */
+      @keyframes marqueeSlide {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-50%); }
+      }
+      .animate-marquee {
+        display: inline-flex;
+        white-space: nowrap;
+        animation: marqueeSlide 26s linear infinite;
+        will-change: transform;
+      }
+      .animate-marquee:hover {
+        animation-play-state: paused;
+      }
+
+      /* Pulse */
+      @keyframes softPulse {
+        0%, 100% { opacity: 1; transform: translateY(0); }
+        50% { opacity: 0.5; transform: translateY(3px); }
+      }
+      .animate-scroll-cue {
+        animation: softPulse 2.2s ease-in-out infinite;
+      }
+
+      /* Layout utility styles */
+      .section-container {
+        min-height: 100svh;
+        position: relative;
+        z-index: 10;
+        pointer-events: none;
+      }
+      .interactive {
+        pointer-events: auto;
+      }
+
+      /* SplitText text clipping masks & reading reveal */
+      .split-line {
+        overflow: hidden !important;
+        display: block !important;
+        padding-top: 0.12em !important;
+        padding-bottom: 0.12em !important;
+        margin-top: -0.12em !important;
+        margin-bottom: -0.12em !important;
+      }
+      .split-word {
+        display: inline-block !important;
+        will-change: transform, opacity;
+        transform-origin: 0% 100%;
+        vertical-align: baseline;
+      }
+      .reading-word {
+        display: inline-block !important;
+        will-change: opacity;
+      }
+      .gsap-text-active {
+        opacity: 1 !important;
+        transform: none !important;
+        filter: none !important;
+        transition: none !important;
+      }
+
+      /* Floating Glassmorphism Navbar */
+      #navbar-wrapper {
+        position: fixed;
+        top: 16px;
+        left: 0;
+        right: 0;
+        z-index: 45;
+        display: flex;
+        justify-content: center;
+        padding: 0 1rem;
+        pointer-events: none;
+        opacity: 0;
+        transform: translateY(-20px);
+        transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      #main-header {
+        pointer-events: auto;
+        width: 100%;
+        max-width: 1200px;
+        height: 4.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 1rem 0 1.5rem;
+        border-radius: 9999px;
+        background: rgba(255, 255, 255, 0.35);
+        backdrop-filter: blur(18px) saturate(160%);
+        -webkit-backdrop-filter: blur(18px) saturate(160%);
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        box-shadow: 0 8px 32px rgba(15, 40, 120, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        transition: background-color 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                    border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                    box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                    backdrop-filter 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                    color 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      #main-header.is-scrolled {
+        background: rgba(255, 255, 255, 0.72);
+        backdrop-filter: blur(24px) saturate(180%);
+        -webkit-backdrop-filter: blur(24px) saturate(180%);
+        border-color: rgba(255, 255, 255, 0.85);
+        box-shadow: 0 12px 36px rgba(14, 42, 197, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.95);
+      }
+      #main-header.dark-glass {
+        background: rgba(10, 14, 30, 0.55) !important;
+        backdrop-filter: blur(22px) saturate(160%) !important;
+        -webkit-backdrop-filter: blur(22px) saturate(160%) !important;
+        border-color: rgba(255, 255, 255, 0.14) !important;
+        box-shadow: 0 14px 44px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+        color: #ffffff !important;
+      }
+      #main-header.dark-glass .nav-link-item {
+        color: rgba(255, 255, 255, 0.75) !important;
+      }
+      #main-header.dark-glass .nav-link-item:hover,
+      #main-header.dark-glass .nav-link-item.active {
+        color: #ffffff !important;
+      }
+      #main-header.dark-glass .nav-link-item.active::after {
+        background: #ffffff !important;
+      }
+      #main-header.dark-glass .header-logo-img {
+        filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.45));
+      }
+      #main-header.dark-glass #btn-open-drawer,
+      #main-header.dark-glass #btn-mobile-menu {
+        background: rgba(255, 255, 255, 0.12);
+        border-color: rgba(255, 255, 255, 0.2);
+        color: #ffffff;
+      }
+
+      @supports not (backdrop-filter: blur(1px)) {
+        #main-header {
+          background: rgba(255, 255, 255, 0.95);
+        }
+        #main-header.dark-glass {
+          background: rgba(10, 14, 30, 0.95) !important;
+        }
+      }
+
+      .nav-link-item {
+        position: relative;
+        color: #1a1a1a;
+        text-decoration: none;
+        transition: color 0.2s, opacity 0.2s;
+        padding: 0.4rem 0.35rem;
+      }
+      .nav-link-item::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        width: 0;
+        height: 2px;
+        background: #0e2ac5;
+        border-radius: 99px;
+        transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1), left 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      .nav-link-item:hover::after,
+      .nav-link-item.active::after {
+        width: 100%;
+        left: 0;
+      }
+      .nav-link-item.active {
+        font-weight: 600;
+        color: #0e2ac5;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Background Fixed Gradient Layer (-z-10) -->
+    <div id="bg-gradient"></div>
+
+    <!-- WebGL Canvas Container (z-0) -->
+    <div id="canvas-container">
+      <canvas id="webgl-canvas"></canvas>
+    </div>
+
+    <!-- Pre-roll Loader (z-100) -->
+    <div
+      id="loader"
+      style="
+        position: fixed;
+        inset: 0;
+        z-index: 100;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 26px;
+        background: radial-gradient(circle at 50% 42%, #ffffff 0%, #eef2ff 45%, #dbe4ff 100%);
+        transition: opacity 0.55s cubic-bezier(0.65, 0, 0.35, 1);
+      "
+    >
+      <div
+        id="loader-status"
+        class="font-mono text-[#6b7bb5]"
+        style="
+          font-size: 10px;
+          letter-spacing: 0.28em;
+          text-transform: uppercase;
+          opacity: 0;
+          transform: translateY(18px);
+          filter: blur(6px);
+          transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), filter 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        "
+      >
+        Preparando arte & cenografia
+      </div>
+
+      <div
+        id="loader-bar-track"
+        style="
+          width: clamp(180px, 32vw, 280px);
+          height: 2px;
+          background: rgba(14, 42, 197, 0.14);
+          border-radius: 99px;
+          overflow: hidden;
+          position: relative;
+          opacity: 0;
+          transform: translateY(18px);
+          filter: blur(6px);
+          transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.16s, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.16s, filter 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.16s;
+        "
+      >
+        <div
+          id="loader-bar-fill"
+          style="
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #5175ff 0%, #0e2ac5 100%);
+            box-shadow: 0 0 14px rgba(47, 105, 255, 0.55);
+            border-radius: 99px;
+            transition: width 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+          "
+        ></div>
+      </div>
+
+      <div
+        id="loader-counter"
+        class="font-mono font-bold"
+        style="
+          font-size: 11px;
+          letter-spacing: 0.1em;
+          color: #0e2ac5;
+          font-variant-numeric: tabular-nums;
+          opacity: 0;
+          transform: translateY(18px);
+          filter: blur(6px);
+          transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.32s, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.32s, filter 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.32s;
+        "
+      >
+        000%
+      </div>
+    </div>
+
+    <!-- Floating Glassmorphism Navbar (fixed, z-45) -->
+    <div id="navbar-wrapper">
+      <header id="main-header">
+        <!-- Logo Oficial Arte Bola Balões -->
+        <a
+          href="#hero"
+          id="navbar-brand-link"
+          aria-label="Arte Bola Balões — Início"
+          class="interactive"
+          style="display: flex; align-items: center; text-decoration: none;"
+        >
+          <img
+            src="/images/logo-opt.webp"
+            srcset="/images/logo-mobile.webp 540w, /images/logo-opt.webp 1080w"
+            sizes="(max-width: 768px) 130px, 168px"
+            alt="Arte Bola Balões"
+            class="header-logo-img"
+            style="
+              height: 44px;
+              width: auto;
+              object-fit: contain;
+              display: block;
+              transition: filter 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s;
+            "
+          />
+        </a>
+
+        <!-- Desktop Navigation with Scroll-Spy & Active Underlines -->
+        <nav
+          id="desktop-nav"
+          class="interactive font-raleway"
+          style="
+            display: none;
+            align-items: center;
+            gap: 2rem;
+            font-size: 14px;
+            font-weight: 500;
+          "
+        >
+          <a href="#hero" class="nav-link-item active" data-nav="hero">Início</a>
+          <span style="opacity: 0.25; user-select: none;">·</span>
+          <a href="#physics" class="nav-link-item" data-nav="physics">Processo</a>
+          <span style="opacity: 0.25; user-select: none;">·</span>
+          <a href="#form" class="nav-link-item" data-nav="form">Criações</a>
+          <span style="opacity: 0.25; user-select: none;">·</span>
+          <a href="#release" class="nav-link-item" data-nav="release">Nossa arte</a>
+          <span style="opacity: 0.25; user-select: none;">·</span>
+          <a href="#contact" class="nav-link-item" data-nav="contact">Contato</a>
+        </nav>
+
+        <!-- Right Controls -->
+        <div class="interactive" style="display: flex; align-items: center; gap: 0.65rem;">
+          <!-- Mobile Menu Hamburger Button -->
+          <button
+            id="btn-mobile-menu"
+            class="glass-btn"
+            aria-label="Menu de Navegação"
+            style="
+              display: none;
+              width: 2.65rem;
+              height: 2.65rem;
+              border-radius: 9999px;
+              align-items: center;
+              justify-content: center;
+              cursor: pointer;
+              border: 1px solid rgba(255, 255, 255, 0.4);
+            "
+          >
+            <svg id="hamburger-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="4" x2="20" y1="12" y2="12"></line>
+              <line x1="4" x2="20" y1="6" y2="6"></line>
+              <line x1="4" x2="20" y1="18" y2="18"></line>
+            </svg>
+          </button>
+
+          <!-- Palette Sliders Button -->
+          <button
+            id="btn-open-drawer"
+            class="glass-btn"
+            aria-label="Controles de Cores"
+            style="
+              width: 2.65rem;
+              height: 2.65rem;
+              border-radius: 9999px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              cursor: pointer;
+              border: 1px solid rgba(255, 255, 255, 0.4);
+            "
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="21" x2="14" y1="4" y2="4"></line>
+              <line x1="10" x2="3" y1="4" y2="4"></line>
+              <line x1="21" x2="12" y1="12" y2="12"></line>
+              <line x1="8" x2="3" y1="12" y2="12"></line>
+              <line x1="21" x2="16" y1="20" y2="20"></line>
+              <line x1="12" x2="3" y1="20" y2="20"></line>
+              <line x1="14" x2="14" y1="2" y2="6"></line>
+              <line x1="8" x2="8" y1="10" y2="14"></line>
+              <line x1="16" x2="16" y1="18" y2="22"></line>
+            </svg>
+          </button>
+
+          <!-- Contact Us Pill -> Solicitar Orçamento -->
+          <a
+            href="https://www.instagram.com/artebolabaloes/"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="glass-pill font-raleway group"
+            id="contact-header-btn"
+            style="
+              display: inline-flex;
+              align-items: center;
+              padding-left: 1.2rem;
+              padding-right: 0.35rem;
+              padding-top: 0.35rem;
+              padding-bottom: 0.35rem;
+              border-radius: 9999px;
+              text-decoration: none;
+              color: inherit;
+              font-size: 13.5px;
+              font-weight: 500;
+              cursor: pointer;
+              gap: 0.7rem;
+              transition: transform 0.2s;
+            "
+          >
+            <span id="contact-btn-label">Solicitar orçamento</span>
+            <div
+              class="blue-orb-gradient"
+              id="contact-orb"
+              style="
+                width: 1.95rem;
+                height: 1.95rem;
+                border-radius: 9999px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #ffffff;
+                box-shadow: 0 2px 8px rgba(14, 42, 197, 0.35);
+                transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+              "
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m9 18 6-6-6-6"></path>
+              </svg>
+            </div>
+          </a>
+        </div>
+      </header>
+    </div>
+
+    <!-- Mobile Navigation Drawer Overlay (Glassmorphism) -->
+    <div
+      id="mobile-nav-drawer"
+      style="
+        position: fixed;
+        inset: 0;
+        z-index: 43;
+        background: rgba(10, 14, 30, 0.55);
+        backdrop-filter: blur(24px) saturate(180%);
+        -webkit-backdrop-filter: blur(24px) saturate(180%);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      "
+    >
+      <nav
+        class="font-raleway"
+        style="
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 1.75rem;
+          font-size: 1.5rem;
+          font-weight: 600;
+        "
+      >
+        <a href="#hero" class="mobile-nav-link" style="color: #ffffff; text-decoration: none; opacity: 0; transform: translateY(16px); transition: all 0.35s;">Início</a>
+        <a href="#physics" class="mobile-nav-link" style="color: #ffffff; text-decoration: none; opacity: 0; transform: translateY(16px); transition: all 0.35s 0.05s;">Processo</a>
+        <a href="#form" class="mobile-nav-link" style="color: #ffffff; text-decoration: none; opacity: 0; transform: translateY(16px); transition: all 0.35s 0.1s;">Criações</a>
+        <a href="#release" class="mobile-nav-link" style="color: #ffffff; text-decoration: none; opacity: 0; transform: translateY(16px); transition: all 0.35s 0.15s;">Nossa arte</a>
+        <a href="#contact" class="mobile-nav-link" style="color: #ffffff; text-decoration: none; opacity: 0; transform: translateY(16px); transition: all 0.35s 0.2s;">Contato</a>
+        <a
+          href="https://www.instagram.com/artebolabaloes/"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="glass-pill mobile-nav-link"
+          style="
+            margin-top: 1.25rem;
+            padding: 0.85rem 2rem;
+            border-radius: 9999px;
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 15px;
+            opacity: 0;
+            transform: translateY(16px);
+            transition: all 0.35s 0.25s;
+          "
+        >
+          Solicitar orçamento →
+        </a>
+      </nav>
+    </div>
+
+    <!-- MAIN SCROLLING CONTENT -->
+    <main>
+      <!-- Section 01 — HERO (min-h-100svh, flex items-end) -->
+      <section
+        id="hero"
+        class="section-container"
+        style="
+          display: flex;
+          align-items: flex-end;
+          padding: 0 1.5rem 3rem 1.5rem;
+        "
+      >
+        <div
+          id="hero-content"
+          style="
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 2rem;
+          "
+        >
+          <!-- Left column (Sem Eyebrow) -->
+          <div class="interactive" style="display: flex; flex-direction: column; align-items: flex-start;">
+            <!-- Headline -->
+            <h1
+              id="hero-headline"
+              class="hero-item font-raleway"
+              style="
+                --rise-from: 22px;
+                margin: 0;
+                font-size: clamp(2.6rem, 7.5vw, 90px);
+                line-height: 0.95;
+                font-weight: 500;
+                letter-spacing: -0.04em;
+                color: #0a0a0a;
+              "
+            >
+              Mais que balões.<br />Pura arte.
+            </h1>
+          </div>
+
+          <!-- Right column -->
+          <div
+            id="hero-right"
+            class="interactive hero-item"
+            style="
+              --rise-from: 18px;
+              max-width: 320px;
+            "
+          >
+            <p
+              class="font-raleway"
+              style="
+                margin: 0;
+                font-size: 15px;
+                font-weight: 500;
+                line-height: 1.45;
+                color: #1a1a1a;
+              "
+            >
+              Criamos cenários únicos com cor, forma e imaginação para transformar celebrações em momentos inesquecíveis.
+            </p>
+            <div
+              class="font-mono"
+              style="
+                margin-top: 1.25rem;
+                font-size: 10px;
+                letter-spacing: 0.18em;
+                text-transform: uppercase;
+                color: #737373;
+              "
+            >
+              DESDE 1999 — FORTALEZA, CE
+            </div>
+
+            <!-- Pulsing scroll cue (desktop only) -->
+            <div
+              id="hero-scroll-cue"
+              class="animate-scroll-cue font-mono"
+              style="
+                display: none;
+                align-items: center;
+                gap: 0.45rem;
+                margin-top: 1rem;
+                color: #737373;
+                font-size: 10px;
+                letter-spacing: 0.2em;
+                text-transform: uppercase;
+              "
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 5v14"></path>
+                <path d="m19 12-7 7-7-7"></path>
+              </svg>
+              <span>ROLE PARA EXPLORAR</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 02 — DROP / Physics (min-h-100svh, flex items-center) -->
+      <section
+        id="physics"
+        class="section-container"
+        style="
+          display: flex;
+          align-items: center;
+          padding: 8rem 1.5rem 10rem 1.5rem;
+        "
+      >
+        <div
+          id="physics-grid"
+          style="
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2.5rem;
+            align-items: flex-start;
+          "
+        >
+          <!-- Left Column (Sem Eyebrow) -->
+          <div class="interactive" style="max-width: 680px;">
+            <h2
+              class="font-raleway"
+              style="
+                margin: 0;
+                font-size: clamp(2.6rem, 6.5vw, 80px);
+                line-height: 0.95;
+                font-weight: 500;
+                letter-spacing: -0.035em;
+                color: #0a0a0a;
+              "
+            >
+              Toda grande ideia<br />ganha forma.
+            </h2>
+
+            <p
+              class="font-raleway"
+              style="
+                margin: 2rem 0 0 0;
+                max-width: 32rem;
+                font-size: clamp(16px, 1.25vw, 19px);
+                line-height: 1.55;
+                color: #3f3f46;
+              "
+            >
+              Cada criação começa com uma ideia. Estudamos cores, proporções e espaços para transformar balões em cenários que surpreendem e ficam na memória.
+            </p>
+          </div>
+
+          <!-- Right Column — 3 Glass Process Cards -->
+          <div
+            class="interactive"
+            style="
+              display: flex;
+              flex-direction: column;
+              gap: 0.9rem;
+              max-width: 440px;
+              width: 100%;
+            "
+          >
+            <!-- Card 01 -->
+            <div class="glass-card-ring">
+              <div class="glass-card-inner" style="padding: 1.25rem 1.5rem;">
+                <div class="card-top-sheen"></div>
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
+                  <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <span class="font-mono" style="font-size: 10px; color: #a1a1aa;">01</span>
+                    <span class="font-mono" style="font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: #71717a;">Processo</span>
+                  </div>
+                  <div class="dot-glow" style="width: 7px; height: 7px; border-radius: 9999px;"></div>
+                </div>
+                <div class="font-raleway" style="font-size: 18px; font-weight: 600; color: #0a0a0a; margin-bottom: 0.25rem;">
+                  CONCEITO
+                </div>
+                <div class="font-sans" style="font-size: 13px; color: #71717a;">
+                  Tudo começa com a sua ideia.
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 02 -->
+            <div class="glass-card-ring">
+              <div class="glass-card-inner" style="padding: 1.25rem 1.5rem;">
+                <div class="card-top-sheen"></div>
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
+                  <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <span class="font-mono" style="font-size: 10px; color: #a1a1aa;">02</span>
+                    <span class="font-mono" style="font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: #71717a;">Harmonia</span>
+                  </div>
+                  <div class="dot-glow" style="width: 7px; height: 7px; border-radius: 9999px;"></div>
+                </div>
+                <div class="font-raleway" style="font-size: 18px; font-weight: 600; color: #0a0a0a; margin-bottom: 0.25rem;">
+                  CRIAÇÃO
+                </div>
+                <div class="font-sans" style="font-size: 13px; color: #71717a;">
+                  Cores, formas e proporções em harmonia.
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 03 -->
+            <div class="glass-card-ring">
+              <div class="glass-card-inner" style="padding: 1.25rem 1.5rem;">
+                <div class="card-top-sheen"></div>
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
+                  <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <span class="font-mono" style="font-size: 10px; color: #a1a1aa;">03</span>
+                    <span class="font-mono" style="font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: #71717a;">Cenografia</span>
+                  </div>
+                  <div class="dot-glow" style="width: 7px; height: 7px; border-radius: 9999px;"></div>
+                </div>
+                <div class="font-raleway" style="font-size: 18px; font-weight: 600; color: #0a0a0a; margin-bottom: 0.25rem;">
+                  REALIZAÇÃO
+                </div>
+                <div class="font-sans" style="font-size: 13px; color: #71717a;">
+                  Arte que transforma o ambiente.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 03 — SHAPE / Form (min-h-100svh, flex-col justify-between) -->
+      <section
+        id="form"
+        class="section-container"
+        style="
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          padding: 9rem 1.5rem 11rem 1.5rem;
+        "
+      >
+        <!-- Top heading (Sem Eyebrow) -->
+        <div class="interactive" style="max-width: 720px;">
+          <h2
+            class="font-raleway"
+            style="
+              margin: 0;
+              font-size: clamp(2.6rem, 6.5vw, 80px);
+              line-height: 0.95;
+              font-weight: 500;
+              letter-spacing: -0.035em;
+              color: #0a0a0a;
+            "
+          >
+            Cor. Volume. Surpresa.
+          </h2>
+        </div>
+
+        <!-- Bottom right-aligned text block -->
+        <div
+          id="form-bottom-block"
+          class="interactive"
+          style="
+            align-self: flex-end;
+            max-width: 27rem;
+            margin-top: 3rem;
+          "
+        >
+          <p
+            class="font-raleway"
+            style="
+              margin: 0;
+              font-size: clamp(16px, 1.25vw, 19px);
+              line-height: 1.55;
+              color: #3f3f46;
+            "
+          >
+            Cada projeto é uma nova possibilidade de transformar o espaço. Com criatividade e atenção a cada detalhe, damos vida a composições que encantam de todos os ângulos.
+          </p>
+
+          <div
+            style="
+              margin-top: 1.75rem;
+            "
+          >
+            <div
+              style="
+                display: inline-flex;
+                align-items: center;
+                gap: 0.5rem;
+                padding: 0.6rem 1rem;
+                border-radius: 9999px;
+                border: 1px solid rgba(255, 255, 255, 0.55);
+                background: rgba(255, 255, 255, 0.35);
+                backdrop-filter: blur(16px);
+                -webkit-backdrop-filter: blur(16px);
+                color: #3f3f46;
+                user-select: none;
+              "
+            >
+              <!-- Lucide mouse-pointer -->
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m3 3 7.07 16.97 2.51-7.39 7.39-2.51L3 3z"></path>
+                <path d="m13 13 6 6"></path>
+              </svg>
+              <span id="interaction-cue-text" class="font-mono" style="font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;">
+                MOVA O CURSOR E EXPLORE
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 04 — MEMÓRIA E EMOÇÃO (min-h-100svh, centered) -->
+      <section
+        id="release"
+        class="section-container"
+        style="
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
+          padding: 9rem 1.5rem 11rem 1.5rem;
+        "
+      >
+        <div style="max-width: 48rem; margin: 0 auto;">
+          <h2
+            class="interactive font-raleway"
+            style="
+              margin: 0;
+              font-size: clamp(2.8rem, 7.5vw, 88px);
+              line-height: 0.95;
+              font-weight: 500;
+              letter-spacing: -0.04em;
+              color: #0a0a0a;
+            "
+          >
+            O instante vira memória.
+          </h2>
+
+          <p
+            class="interactive font-raleway"
+            style="
+              margin: 2rem auto 0 auto;
+              max-width: 32rem;
+              font-size: clamp(16px, 1.25vw, 19px);
+              line-height: 1.55;
+              color: #3f3f46;
+            "
+          >
+            A festa acontece uma vez. O encanto permanece nas lembranças, nos sorrisos e em cada registro de um dia especial.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer
+      id="contact"
+      style="
+        background-color: #0a0a0a;
+        color: #ffffff;
+        border-top-left-radius: clamp(2.5rem, 5vw, 4rem);
+        border-top-right-radius: clamp(2.5rem, 5vw, 4rem);
+        overflow: hidden;
+        position: relative;
+        z-index: 10;
+        pointer-events: auto;
+      "
+    >
+      <!-- Glow blooms -->
+      <div
+        style="
+          position: absolute;
+          width: 28rem;
+          height: 28rem;
+          top: -8rem;
+          right: -8rem;
+          border-radius: 9999px;
+          pointer-events: none;
+          background: radial-gradient(circle, rgba(47, 105, 255, 0.4) 0%, transparent 65%);
+          filter: blur(48px);
+        "
+      ></div>
+      <div
+        style="
+          position: absolute;
+          width: 32rem;
+          height: 32rem;
+          bottom: -8rem;
+          left: -8rem;
+          border-radius: 9999px;
+          pointer-events: none;
+          background: radial-gradient(circle, rgba(81, 117, 255, 0.27) 0%, transparent 65%);
+          filter: blur(48px);
+        "
+      ></div>
+
+      <!-- Marquee Ticker -->
+      <div
+        style="
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+          padding: 1.25rem 0;
+          overflow: hidden;
+          position: relative;
+        "
+      >
+        <div
+          class="animate-marquee font-raleway"
+          style="
+            font-size: clamp(28px, 6vw, 64px);
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.9);
+          "
+        >
+          <!-- Sequence 1 -->
+          <span style="padding: 0 2rem; display: inline-flex; align-items: center; gap: 2rem;">
+            ARTE QUE ENCANTA <span style="width: 10px; height: 10px; border-radius: 9999px; background-color: #2f69ff; display: inline-block;"></span>
+          </span>
+          <span style="padding: 0 2rem; display: inline-flex; align-items: center; gap: 2rem;">
+            CORES QUE CONTAM HISTÓRIAS <span style="width: 10px; height: 10px; border-radius: 9999px; background-color: #2f69ff; display: inline-block;"></span>
+          </span>
+          <span style="padding: 0 2rem; display: inline-flex; align-items: center; gap: 2rem;">
+            FORMAS QUE SURPREENDEM <span style="width: 10px; height: 10px; border-radius: 9999px; background-color: #2f69ff; display: inline-block;"></span>
+          </span>
+          <span style="padding: 0 2rem; display: inline-flex; align-items: center; gap: 2rem;">
+            MEMÓRIAS QUE FICAM <span style="width: 10px; height: 10px; border-radius: 9999px; background-color: #2f69ff; display: inline-block;"></span>
+          </span>
+
+          <!-- Sequence 2 (Seamless loop) -->
+          <span style="padding: 0 2rem; display: inline-flex; align-items: center; gap: 2rem;">
+            ARTE QUE ENCANTA <span style="width: 10px; height: 10px; border-radius: 9999px; background-color: #2f69ff; display: inline-block;"></span>
+          </span>
+          <span style="padding: 0 2rem; display: inline-flex; align-items: center; gap: 2rem;">
+            CORES QUE CONTAM HISTÓRIAS <span style="width: 10px; height: 10px; border-radius: 9999px; background-color: #2f69ff; display: inline-block;"></span>
+          </span>
+          <span style="padding: 0 2rem; display: inline-flex; align-items: center; gap: 2rem;">
+            FORMAS QUE SURPREENDEM <span style="width: 10px; height: 10px; border-radius: 9999px; background-color: #2f69ff; display: inline-block;"></span>
+          </span>
+          <span style="padding: 0 2rem; display: inline-flex; align-items: center; gap: 2rem;">
+            MEMÓRIAS QUE FICAM <span style="width: 10px; height: 10px; border-radius: 9999px; background-color: #2f69ff; display: inline-block;"></span>
+          </span>
+        </div>
+      </div>
+
+      <!-- Footer Body -->
+      <div
+        id="footer-body"
+        style="
+          padding: 4rem 1.5rem 2.5rem 1.5rem;
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 3rem;
+          position: relative;
+          z-index: 1;
+        "
+      >
+        <!-- CTA column (Sem Eyebrow) -->
+        <div style="max-width: 520px;">
+          <h3
+            class="font-raleway"
+            style="
+              margin: 0;
+              font-size: clamp(2.25rem, 5vw, 3.75rem);
+              line-height: 0.95;
+              font-weight: 500;
+              color: #ffffff;
+            "
+          >
+            Sua ideia merece<br />ganhar forma.
+          </h3>
+
+          <p
+            class="font-raleway"
+            style="
+              margin: 1.25rem 0 0 0;
+              font-size: 16px;
+              line-height: 1.5;
+              color: rgba(255, 255, 255, 0.7);
+              max-width: 28rem;
+            "
+          >
+            Conte o que você imagina. Vamos criar algo especial.
+          </p>
+
+          <a
+            href="https://www.instagram.com/artebolabaloes/"
+            target="_blank"
+            rel="noopener noreferrer"
+            id="footer-email-btn"
+            class="font-raleway"
+            style="
+              margin-top: 2rem;
+              display: inline-flex;
+              align-items: center;
+              gap: 1.25rem;
+              padding-left: 1.75rem;
+              padding-right: 0.5rem;
+              padding-top: 0.5rem;
+              padding-bottom: 0.5rem;
+              border-radius: 9999px;
+              border: 1px solid rgba(255, 255, 255, 0.15);
+              background: rgba(255, 255, 255, 0.05);
+              text-decoration: none;
+              color: #ffffff;
+              font-size: 14px;
+              font-weight: 600;
+              letter-spacing: 0.08em;
+              transition: background-color 0.2s, border-color 0.2s;
+            "
+            onmouseover="this.style.background='rgba(255,255,255,0.1)'; document.getElementById('footer-email-orb-icon').style.transform='rotate(45deg)';"
+            onmouseout="this.style.background='rgba(255,255,255,0.05)'; document.getElementById('footer-email-orb-icon').style.transform='rotate(0deg)';"
+          >
+            <span>SOLICITAR ORÇAMENTO</span>
+            <div
+              class="blue-orb-gradient"
+              style="
+                width: 2.5rem;
+                height: 2.5rem;
+                border-radius: 9999px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #ffffff;
+              "
+            >
+              <svg
+                id="footer-email-orb-icon"
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                style="transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);"
+              >
+                <path d="M7 7h10v10"></path>
+                <path d="M7 17 17 7"></path>
+              </svg>
+            </div>
+          </a>
+        </div>
+
+        <!-- Links Columns -->
+        <div
+          id="footer-links-grid"
+          style="
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 2rem;
+          "
+        >
+          <!-- Navegação Column -->
+          <div class="reveal" style="transition-delay: 0.08s;">
+            <div
+              class="font-mono"
+              style="
+                font-size: 10px;
+                letter-spacing: 0.25em;
+                text-transform: uppercase;
+                color: rgba(255, 255, 255, 0.4);
+                margin-bottom: 1rem;
+              "
+            >
+              Navegação
+            </div>
+            <ul class="font-raleway" style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.75rem;">
+              <li><a href="#hero" style="color: rgba(255, 255, 255, 0.75); text-decoration: none; font-size: 15px; display: inline-flex; align-items: center; gap: 0.35rem; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.75)'">Início</a></li>
+              <li><a href="#physics" style="color: rgba(255, 255, 255, 0.75); text-decoration: none; font-size: 15px; display: inline-flex; align-items: center; gap: 0.35rem; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.75)'">Processo</a></li>
+              <li><a href="#form" style="color: rgba(255, 255, 255, 0.75); text-decoration: none; font-size: 15px; display: inline-flex; align-items: center; gap: 0.35rem; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.75)'">Criações</a></li>
+              <li><a href="#release" style="color: rgba(255, 255, 255, 0.75); text-decoration: none; font-size: 15px; display: inline-flex; align-items: center; gap: 0.35rem; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.75)'">Nossa arte</a></li>
+            </ul>
+          </div>
+
+          <!-- Estúdio Column -->
+          <div class="reveal" style="transition-delay: 0.16s;">
+            <div
+              class="font-mono"
+              style="
+                font-size: 10px;
+                letter-spacing: 0.25em;
+                text-transform: uppercase;
+                color: rgba(255, 255, 255, 0.4);
+                margin-bottom: 1rem;
+              "
+            >
+              Estúdio
+            </div>
+            <ul class="font-raleway" style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.75rem;">
+              <li style="color: rgba(255, 255, 255, 0.75); font-size: 15px;">Arte Bola Balões</li>
+              <li style="color: rgba(255, 255, 255, 0.75); font-size: 15px;">Fortaleza — Ceará</li>
+              <li style="color: rgba(255, 255, 255, 0.75); font-size: 15px;">Desde 1999</li>
+              <li style="color: rgba(255, 255, 255, 0.75); font-size: 15px;">Festas & Cenografia</li>
+            </ul>
+          </div>
+
+          <!-- Social Column -->
+          <div class="reveal" style="transition-delay: 0.24s;">
+            <div
+              class="font-mono"
+              style="
+                font-size: 10px;
+                letter-spacing: 0.25em;
+                text-transform: uppercase;
+                color: rgba(255, 255, 255, 0.4);
+                margin-bottom: 1rem;
+              "
+            >
+              Social
+            </div>
+            <ul class="font-raleway" style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.75rem;">
+              <li><a href="https://www.instagram.com/artebolabaloes/" target="_blank" rel="noopener noreferrer" style="color: rgba(255, 255, 255, 0.75); text-decoration: none; font-size: 15px; display: inline-flex; align-items: center; gap: 0.35rem; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.75)'">Instagram</a></li>
+              <li><a href="https://www.instagram.com/artebolabaloes/" target="_blank" rel="noopener noreferrer" style="color: rgba(255, 255, 255, 0.75); text-decoration: none; font-size: 15px; display: inline-flex; align-items: center; gap: 0.35rem; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.75)'">@artebolabaloes</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Bar -->
+      <div
+        id="footer-bottom-bar"
+        style="
+          margin: 4rem 1.5rem 0 1.5rem;
+          padding: 1.75rem 0;
+          border-top: 1px solid rgba(255, 255, 255, 0.1);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: space-between;
+          gap: 1.5rem;
+        "
+      >
+        <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 1rem; justify-content: center;">
+          <a href="#hero" aria-label="Arte Bola Balões — Início" style="display: inline-flex; align-items: center; text-decoration: none;">
+            <img
+              src="/images/logo-opt.webp"
+              srcset="/images/logo-mobile.webp 540w, /images/logo-opt.webp 1080w"
+              sizes="140px"
+              alt="Arte Bola Balões"
+              style="height: 36px; width: auto; object-fit: contain; filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.45)); transition: transform 0.2s;"
+              onmouseover="this.style.transform='scale(1.04)';"
+              onmouseout="this.style.transform='scale(1)';"
+            />
+          </a>
+          <span style="width: 5px; height: 5px; border-radius: 9999px; background-color: #2f69ff; display: inline-block;"></span>
+          <span class="font-mono" style="font-size: 11px; color: rgba(255, 255, 255, 0.4);">
+            © 2026 Arte Bola Balões — Fortaleza, CE. Todos os direitos reservados.
+          </span>
+        </div>
+
+        <!-- Social Round Buttons -->
+        <div style="display: flex; align-items: center; gap: 0.6rem;">
+          <!-- Instagram -->
+          <a
+            href="https://www.instagram.com/artebolabaloes/"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Instagram Arte Bola Balões"
+            style="
+              width: 2.5rem;
+              height: 2.5rem;
+              border-radius: 9999px;
+              border: 1px solid rgba(255, 255, 255, 0.15);
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              color: rgba(255, 255, 255, 0.7);
+              text-decoration: none;
+              transition: all 0.2s;
+            "
+            onmouseover="this.style.borderColor='rgba(255,255,255,0.3)'; this.style.color='#ffffff';"
+            onmouseout="this.style.borderColor='rgba(255,255,255,0.15)'; this.style.color='rgba(255,255,255,0.7)';"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect>
+              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+              <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Studio Controls Drawer (Palette Switcher) -->
+    <!-- Scrim (z-40) -->
+    <div
+      id="drawer-scrim"
+      style="
+        position: fixed;
+        inset: 0;
+        z-index: 40;
+        background: rgba(10, 10, 10, 0.25);
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.35s ease;
+      "
+    ></div>
+
+    <!-- Drawer Panel (z-50) -->
+    <aside
+      id="controls-drawer"
+      aria-label="Painel de Cores do Estúdio"
+      style="
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        max-width: 420px;
+        z-index: 50;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border-left: 1px solid #f0f0f0;
+        box-shadow: -10px 0 35px rgba(0, 0, 0, 0.06);
+        padding: 2rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        overflow-y: auto;
+        transform: translateX(100%);
+        transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+      "
+    >
+      <div>
+        <!-- Drawer Header -->
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <div style="display: flex; align-items: center; gap: 0.6rem;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="21" x2="14" y1="4" y2="4"></line>
+              <line x1="10" x2="3" y1="4" y2="4"></line>
+              <line x1="21" x2="12" y1="12" y2="12"></line>
+              <line x1="8" x2="3" y1="12" y2="12"></line>
+              <line x1="21" x2="16" y1="20" y2="20"></line>
+              <line x1="12" x2="3" y1="20" y2="20"></line>
+              <line x1="14" x2="14" y1="2" y2="6"></line>
+              <line x1="8" x2="8" y1="10" y2="14"></line>
+              <line x1="16" x2="16" y1="18" y2="22"></line>
+            </svg>
+            <span class="font-display" style="font-weight: 900; font-size: 14px; letter-spacing: 0.2em; text-transform: uppercase; color: #0a0a0a;">
+              Cores do Estúdio
+            </span>
+          </div>
+
+          <!-- Close button -->
+          <button
+            id="btn-close-drawer"
+            aria-label="Fechar painel"
+            style="
+              width: 2rem;
+              height: 2rem;
+              border-radius: 9999px;
+              border: 1px solid rgba(0, 0, 0, 0.08);
+              background: #ffffff;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              cursor: pointer;
+              color: #555555;
+              transition: all 0.2s;
+            "
+            onmouseover="this.style.background='#f4f4f5'; this.style.color='#000';"
+            onmouseout="this.style.background='#ffffff'; this.style.color='#555';"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 6 6 18"></path>
+              <path d="m6 6 12 12"></path>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Note -->
+        <p class="font-mono" style="margin-top: 1rem; font-size: 12px; font-style: italic; color: #71717a; line-height: 1.45;">
+          Selecione a paleta de cores dos balões. Conforme você rola a página, a composição ganha novas tonalidades e formas.
+        </p>
+
+        <!-- Section Title -->
+        <div style="margin-top: 2rem; display: flex; align-items: center; gap: 0.5rem;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#52525b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"></path>
+          </svg>
+          <span class="font-mono" style="font-size: 10px; letter-spacing: 0.2em; font-weight: 700; text-transform: uppercase; color: #52525b;">
+            Variações Cromáticas
+          </span>
+        </div>
+
+        <!-- Theme Cards Container -->
+        <div id="theme-cards-list" style="margin-top: 1rem; display: flex; flex-direction: column; gap: 0.75rem;">
+          <!-- Dynamically populated theme cards -->
+        </div>
+      </div>
+
+      <!-- Drawer Footer -->
+      <div style="margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid #e4e4e7;">
+        <div class="font-mono" style="font-size: 9px; letter-spacing: 0.15em; color: #a1a1aa; margin-bottom: 0.35rem;">
+          MOTOR VISUAL / THREE.JS WEBGL
+        </div>
+        <div class="font-mono" style="font-size: 9px; letter-spacing: 0.15em; color: #a1a1aa; margin-bottom: 1.25rem;">
+          SIMULAÇÃO FÍSICA / 3D COLLISION VERLET
+        </div>
+
+        <button
+          id="btn-reset-theme"
+          class="font-mono"
+          style="
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.85rem;
+            border-radius: 0.5rem;
+            border: 1px solid #e4e4e7;
+            background: #ffffff;
+            font-size: 11px;
+            color: #3f3f46;
+            cursor: pointer;
+            transition: all 0.2s;
+          "
+          onmouseover="this.style.borderColor='#a1a1aa'; this.style.color='#0a0a0a';"
+          onmouseout="this.style.borderColor='#e4e4e7'; this.style.color='#3f3f46';"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+            <path d="M3 3v5h5"></path>
+          </svg>
+          Restaurar Padrão
+        </button>
+      </div>
+    </aside>
+
+    <!-- Interactive script module -->
+    <script type="module">
+      import * as THREE from 'three';
+      import gsap from 'gsap';
+      import { ScrollTrigger } from 'gsap/ScrollTrigger';
+      import { SplitText } from 'gsap/SplitText';
+
+      gsap.registerPlugin(ScrollTrigger, SplitText);
+
+      // ==========================================
+      // Responsive layout adjustments
+      // ==========================================
+      const mediaQueryDesktop = window.matchMedia('(min-width: 768px)');
+      const mediaQueryLarge = window.matchMedia('(min-width: 1024px)');
+
+      function applyResponsiveLayout() {
+        const isDesktop = mediaQueryDesktop.matches;
+        const isLarge = mediaQueryLarge.matches;
+
+        // Floating Navbar Responsive Layout
+        const header = document.getElementById('main-header');
+        const desktopNav = document.getElementById('desktop-nav');
+        const btnMobileMenu = document.getElementById('btn-mobile-menu');
+        const contactBtnLabel = document.getElementById('contact-btn-label');
+        if (header) {
+          header.style.height = isDesktop ? '4.5rem' : '3.85rem';
+          header.style.padding = isDesktop ? '0 1.5rem 0 2rem' : '0 0.75rem 0 1.15rem';
+        }
+        if (desktopNav) {
+          desktopNav.style.display = isDesktop ? 'flex' : 'none';
+        }
+        if (btnMobileMenu) {
+          btnMobileMenu.style.display = isDesktop ? 'none' : 'flex';
+        }
+        if (contactBtnLabel) {
+          contactBtnLabel.textContent = isDesktop ? 'Solicitar orçamento' : 'Orçamento';
+        }
+
+        // Hero
+        const hero = document.getElementById('hero');
+        const heroContent = document.getElementById('hero-content');
+        const heroHeadline = document.getElementById('hero-headline');
+        const heroScrollCue = document.getElementById('hero-scroll-cue');
+        if (hero) {
+          hero.style.padding = isDesktop ? '0 3rem 3.5rem 3rem' : '0 1.5rem 3rem 1.5rem';
+        }
+        if (heroContent) {
+          heroContent.style.flexDirection = isDesktop ? 'row' : 'column';
+          heroContent.style.alignItems = isDesktop ? 'flex-end' : 'flex-start';
+        }
+        if (heroHeadline) {
+          heroHeadline.style.whiteSpace = 'normal';
+        }
+        if (heroScrollCue) {
+          heroScrollCue.style.display = isDesktop ? 'flex' : 'none';
+        }
+
+        // Interaction cue text (Desktop vs Mobile)
+        const interactionCue = document.getElementById('interaction-cue-text');
+        if (interactionCue) {
+          interactionCue.textContent = isDesktop ? 'MOVA O CURSOR E EXPLORE' : 'TOQUE PARA INTERAGIR';
+        }
+
+        // Physics Section
+        const physics = document.getElementById('physics');
+        const physicsGrid = document.getElementById('physics-grid');
+        if (physics) {
+          physics.style.paddingTop = isDesktop ? '10rem' : '8rem';
+          physics.style.paddingLeft = isDesktop ? '3rem' : '1.5rem';
+          physics.style.paddingRight = isDesktop ? '3rem' : '1.5rem';
+        }
+        if (physicsGrid) {
+          physicsGrid.style.gridTemplateColumns = isLarge ? '7fr 5fr' : '1fr';
+          physicsGrid.style.gap = isLarge ? '4rem' : '2.5rem';
+        }
+
+        // Form Section
+        const form = document.getElementById('form');
+        const formBottomBlock = document.getElementById('form-bottom-block');
+        if (form) {
+          form.style.paddingTop = isDesktop ? '11rem' : '9rem';
+          form.style.paddingBottom = isDesktop ? '11rem' : '9rem';
+          form.style.paddingLeft = isDesktop ? '3rem' : '1.5rem';
+          form.style.paddingRight = isDesktop ? '3rem' : '1.5rem';
+        }
+        if (formBottomBlock) {
+          formBottomBlock.style.textAlign = isDesktop ? 'right' : 'left';
+        }
+
+        // Release Section
+        const release = document.getElementById('release');
+        if (release) {
+          release.style.paddingTop = isDesktop ? '11rem' : '9rem';
+          release.style.paddingBottom = isDesktop ? '11rem' : '9rem';
+          release.style.paddingLeft = isDesktop ? '3rem' : '1.5rem';
+          release.style.paddingRight = isDesktop ? '3rem' : '1.5rem';
+        }
+
+        // Footer
+        const footerBody = document.getElementById('footer-body');
+        const footerBottomBar = document.getElementById('footer-bottom-bar');
+        if (footerBody) {
+          footerBody.style.padding = isDesktop ? '6rem 3rem 2.5rem 3rem' : '4rem 1.5rem 2.5rem 1.5rem';
+          footerBody.style.gridTemplateColumns = isLarge ? '5fr 7fr' : '1fr';
+          footerBody.style.gap = isLarge ? '3rem' : '2.5rem';
+        }
+        if (footerBottomBar) {
+          footerBottomBar.style.margin = isDesktop ? '7rem 3rem 0 3rem' : '5rem 1.5rem 0 1.5rem';
+          footerBottomBar.style.flexDirection = isDesktop ? 'row' : 'column';
+        }
+      }
+
+      mediaQueryDesktop.addEventListener('change', applyResponsiveLayout);
+      mediaQueryLarge.addEventListener('change', applyResponsiveLayout);
+      applyResponsiveLayout();
+
+      // ==========================================
+      // Palette Themes & State
+      // ==========================================
+      const THEMES = [
+        {
+          id: 'roseGold',
+          name: 'Azul Real & Pérola',
+          description: 'Esferas em cobalto vibrante flutuando em gradientes suaves e refinados.',
+          primaryColor: '#2F69FF',
+          ballColor: '#2F69FF',
+          bgHero: 'radial-gradient(circle at center, #ffffff 0%, #ecefff 35%, #c2d1ff 100%)',
+        },
+        {
+          id: 'pinkBlush',
+          name: 'Rosa Blush & Crème',
+          description: 'Tons suaves de rosa e toques alegres em atmosfera festiva sofisticada.',
+          primaryColor: '#FFA6B3',
+          ballColor: '#FFC5C2',
+          bgHero: 'radial-gradient(circle at center, #ffffff 0%, #fff2f4 35%, #ffd6db 100%)',
+        },
+        {
+          id: 'voltLime',
+          name: 'Verde Lima & Ardósia',
+          description: 'Energia luminosa e moderna com contraste vívido e marcante.',
+          primaryColor: '#E1FC03',
+          ballColor: '#E1FC03',
+          bgHero: 'radial-gradient(circle at center, #ffffff 0%, #fbffe5 38%, #e8ff9c 100%)',
+        },
+        {
+          id: 'arcticBlue',
+          name: 'Azul Céu & Cristal',
+          description: 'Transparências cristalinas e leveza inspirada em grandes celebrações.',
+          primaryColor: '#96E5FF',
+          ballColor: '#96E5FF',
+          bgHero: 'radial-gradient(circle at center, #ffffff 0%, #f0f9ff 35%, #cae8ff 100%)',
+        },
+      ];
+
+      let selectedThemeId = 'roseGold';
+      let currentBallColor = '#2F69FF';
+
+      // ==========================================
+      // Background gradient management
+      // ==========================================
+      const bgLayer = document.getElementById('bg-gradient');
+      let currentStage = 0;
+
+      const LIME_GRADIENT = 'radial-gradient(circle at center, #ffffff 0%, #fbffe5 38%, #e8ff9c 100%)';
+      const PINK_GRADIENT = 'radial-gradient(circle at center, #ffffff 0%, #fff0f1 38%, #ffd1d5 100%)';
+
+      function updateBackgroundGradient(stage) {
+        currentStage = stage;
+        const activeTheme = THEMES.find((t) => t.id === selectedThemeId) || THEMES[0];
+        if (stage === 2) {
+          bgLayer.style.background = PINK_GRADIENT;
+        } else if (stage === 1) {
+          bgLayer.style.background = LIME_GRADIENT;
+        } else {
+          bgLayer.style.background = activeTheme.bgHero;
+        }
+      }
+
+      // ==========================================
+      // Smooth Scroll (Lenis-style, vanilla)
+      // ==========================================
+      let targetScroll = window.scrollY;
+      let currentScroll = window.scrollY;
+      const scrollLerp = 0.09;
+
+      const getMaxScroll = () =>
+        Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+
+      window.addEventListener(
+        'wheel',
+        (e) => {
+          // Intercept wheel, clamp target to [0, maxScroll]
+          e.preventDefault();
+          targetScroll += e.deltaY;
+          targetScroll = Math.max(0, Math.min(targetScroll, getMaxScroll()));
+        },
+        { passive: false }
+      );
+
+      // Mobile Drawer Toggle
+      const mobileNavDrawer = document.getElementById('mobile-nav-drawer');
+      const btnMobileMenuEl = document.getElementById('btn-mobile-menu');
+      let mobileDrawerOpen = false;
+
+      function toggleMobileDrawer(open) {
+        mobileDrawerOpen = open !== undefined ? open : !mobileDrawerOpen;
+        if (mobileNavDrawer) {
+          mobileNavDrawer.style.opacity = mobileDrawerOpen ? '1' : '0';
+          mobileNavDrawer.style.pointerEvents = mobileDrawerOpen ? 'auto' : 'none';
+          const links = mobileNavDrawer.querySelectorAll('.mobile-nav-link');
+          links.forEach((l, idx) => {
+            if (mobileDrawerOpen) {
+              l.style.opacity = '1';
+              l.style.transform = 'translateY(0)';
+              l.style.transitionDelay = `${idx * 0.05}s`;
+            } else {
+              l.style.opacity = '0';
+              l.style.transform = 'translateY(16px)';
+              l.style.transitionDelay = '0s';
+            }
+          });
+        }
+      }
+
+      btnMobileMenuEl?.addEventListener('click', () => toggleMobileDrawer());
+      mobileNavDrawer?.querySelectorAll('a').forEach((a) => {
+        a.addEventListener('click', () => toggleMobileDrawer(false));
+      });
+
+      // Navbar scroll, dark-glass state & Scroll-Spy
+      const headerNav = document.getElementById('main-header');
+      const contactSection = document.getElementById('contact');
+      const navLinks = document.querySelectorAll('#desktop-nav .nav-link-item');
+      const trackedSections = ['hero', 'physics', 'form', 'release', 'contact'];
+
+      function updateNavbarScrollState() {
+        const y = window.scrollY;
+        if (headerNav) {
+          if (y > 40) {
+            headerNav.classList.add('is-scrolled');
+          } else {
+            headerNav.classList.remove('is-scrolled');
+          }
+
+          if (contactSection) {
+            const contactTop = contactSection.getBoundingClientRect().top;
+            if (contactTop <= 110) {
+              headerNav.classList.add('dark-glass');
+            } else {
+              headerNav.classList.remove('dark-glass');
+            }
+          }
+        }
+
+        // Scroll-Spy
+        let currentActive = 'hero';
+        for (const id of trackedSections) {
+          const el = document.getElementById(id);
+          if (el) {
+            const rect = el.getBoundingClientRect();
+            if (rect.top <= window.innerHeight * 0.45) {
+              currentActive = id;
+            }
+          }
+        }
+        navLinks.forEach((link) => {
+          if (link.getAttribute('data-nav') === currentActive) {
+            link.classList.add('active');
+          } else {
+            link.classList.remove('active');
+          }
+        });
+      }
+
+      // Keep native scrollbar and key events synchronized
+      window.addEventListener('scroll', () => {
+        updateNavbarScrollState();
+        ScrollTrigger.update();
+        if (Math.abs(window.scrollY - currentScroll) > 12) {
+          targetScroll = window.scrollY;
+          currentScroll = window.scrollY;
+        }
+      });
+
+      // Smooth in-page anchor scroll integration
+      document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+        anchor.addEventListener('click', (e) => {
+          const targetId = anchor.getAttribute('href');
+          if (targetId && targetId !== '#') {
+            const targetEl = document.querySelector(targetId);
+            if (targetEl) {
+              e.preventDefault();
+              targetScroll = targetEl.getBoundingClientRect().top + window.scrollY;
+              targetScroll = Math.max(0, Math.min(targetScroll, getMaxScroll()));
+            }
+          }
+        });
+      });
+
+      // Pointer tracking
+      const mousePos = { x: 99, y: 99, isDown: false };
+      window.addEventListener('pointermove', (e) => {
+        mousePos.x = (e.clientX / window.innerWidth) * 2 - 1;
+        mousePos.y = -(e.clientY / window.innerHeight) * 2 + 1;
+      });
+      window.addEventListener('mousedown', () => {
+        mousePos.isDown = true;
+      });
+      window.addEventListener('mouseup', () => {
+        mousePos.isDown = false;
+      });
+      window.addEventListener('pointerleave', () => {
+        mousePos.x = 99;
+        mousePos.y = 99;
+      });
+
+      // Control object driving the scene
+      const control = {
+        progress: 0,
+        started: false,
+      };
+
+      function updateScrollPhysics() {
+        const vh = window.innerHeight || 1;
+        const progress = window.scrollY / vh;
+        control.progress = progress;
+
+        const stage = progress > 1.55 ? 2 : progress > 0.7 ? 1 : 0;
+        if (stage !== currentStage) {
+          updateBackgroundGradient(stage);
+        }
+      }
+
+      function smoothScrollTick() {
+        if (Math.abs(currentScroll - targetScroll) > 0.1) {
+          currentScroll += (targetScroll - currentScroll) * scrollLerp;
+          window.scrollTo(0, currentScroll);
+          updateScrollPhysics();
+          updateNavbarScrollState();
+          ScrollTrigger.update();
+        }
+        requestAnimationFrame(smoothScrollTick);
+      }
+      requestAnimationFrame(smoothScrollTick);
+
+      // ==========================================
+      // GSAP SplitText + ScrollTrigger Text Animation System
+      // ==========================================
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      let splits = [];
+      let heroSplitInstance = null;
+      let heroTimeline = null;
+      let animCtx = null;
+
+      async function initScrollAnimations() {
+        try {
+          await document.fonts.ready;
+        } catch (e) {
+          console.warn('Font loading wait:', e);
+        }
+
+        // Clean up any previous context or splits to prevent duplicate spans/triggers
+        if (animCtx) {
+          animCtx.revert();
+        }
+        splits.forEach((s) => s && s.revert && s.revert());
+        splits = [];
+
+        // Ensure GSAP targets are active without CSS interference
+        document.querySelectorAll(
+          '#hero-headline, #physics h2, #physics p, #form h2, #form p, #release h2, #release p, #contact h3, #contact p, #physics .glass-card-ring'
+        ).forEach((el) => {
+          el.classList.add('gsap-text-active');
+        });
+
+        if (prefersReducedMotion) {
+          document.querySelectorAll(
+            '#hero-headline, #physics h2, #physics p, #form h2, #form p, #release h2, #release p, #contact h3, #contact p, #physics .glass-card-ring'
+          ).forEach((el) => {
+            el.style.opacity = '1';
+            el.style.transform = 'none';
+          });
+          return;
+        }
+
+        animCtx = gsap.context(() => {
+          // 1. Hero Headline SplitText
+          const heroEl = document.getElementById('hero-headline');
+          if (heroEl) {
+            heroEl.setAttribute('aria-label', 'Mais que balões. Pura arte.');
+            heroSplitInstance = new SplitText(heroEl, {
+              type: 'lines, words',
+              linesClass: 'split-line',
+              wordsClass: 'split-word',
+            });
+            splits.push(heroSplitInstance);
+          }
+
+          // 2. Sections 02, 03, 04 — Single Timeline Per Section:
+          // ENTRADA (0.0 -> 0.28) -> PERMANÊNCIA (0.28 -> 0.72) -> SAÍDA (0.72 -> 1.0)
+          const sections = [
+            {
+              id: '#physics',
+              headline: '#physics h2',
+              label: 'Toda grande ideia ganha forma.',
+              paragraph: '#physics p',
+              cards: '#physics .glass-card-ring',
+              mono: '#physics .font-mono',
+            },
+            {
+              id: '#form',
+              headline: '#form h2',
+              label: 'Cor. Volume. Surpresa.',
+              paragraph: '#form p',
+              cards: null,
+              mono: '#form .font-mono',
+            },
+            {
+              id: '#release',
+              headline: '#release h2',
+              label: 'O instante vira memória.',
+              paragraph: '#release p',
+              cards: null,
+              mono: null,
+            },
+          ];
+
+          sections.forEach(({ id, headline, label, paragraph, cards, mono }) => {
+            const secEl = document.querySelector(id);
+            const headEl = document.querySelector(headline);
+            const pEl = document.querySelector(paragraph);
+            if (!secEl || !headEl || !pEl) return;
+
+            if (label) headEl.setAttribute('aria-label', label);
+
+            const headSplit = new SplitText(headEl, {
+              type: 'lines, words',
+              linesClass: 'split-line',
+              wordsClass: 'split-word',
+            });
+            splits.push(headSplit);
+
+            const pSplit = new SplitText(pEl, {
+              type: 'words',
+              wordsClass: 'reading-word',
+            });
+            splits.push(pSplit);
+
+            const cardsEls = cards ? document.querySelectorAll(cards) : null;
+            const monoEls = mono ? document.querySelectorAll(mono) : null;
+
+            const tl = gsap.timeline({
+              scrollTrigger: {
+                trigger: secEl,
+                start: 'top 80%',
+                end: 'bottom 20%',
+                scrub: 0.6,
+                invalidateOnRefresh: true,
+              },
+              defaults: { ease: 'none' },
+            });
+
+            // FASE 1: ENTRADA (0.0 -> 0.28)
+            tl.fromTo(
+              headSplit.words,
+              { yPercent: 110, rotate: 3, opacity: 0 },
+              { yPercent: 0, rotate: 0, opacity: 1, stagger: 0.035, duration: 0.28 },
+              0
+            );
+
+            tl.fromTo(
+              pSplit.words,
+              { opacity: 0.15 },
+              { opacity: 1, stagger: 0.02, duration: 0.28 },
+              0
+            );
+
+            if (cardsEls && cardsEls.length > 0) {
+              tl.fromTo(
+                cardsEls,
+                { y: 45, opacity: 0 },
+                { y: 0, opacity: 1, stagger: 0.06, duration: 0.28 },
+                0.04
+              );
+            }
+
+            if (monoEls && monoEls.length > 0) {
+              tl.fromTo(
+                monoEls,
+                { opacity: 0.2, letterSpacing: '0.1em' },
+                { opacity: 1, letterSpacing: '0.18em', duration: 0.28 },
+                0
+              );
+            }
+
+            // FASE 2: PERMANÊNCIA (0.28 -> 0.72)
+            // Todos os elementos permanecem em opacity 1, yPercent 0, perfeitamente legíveis
+            tl.to({}, { duration: 0.44 });
+
+            // FASE 3: SAÍDA (0.72 -> 1.0) usando apenas .to()
+            tl.to(
+              headSplit.words,
+              { yPercent: -60, opacity: 0, stagger: 0.02, duration: 0.28 },
+              0.72
+            );
+
+            tl.to(
+              pSplit.words,
+              { opacity: 0, y: -20, stagger: 0.012, duration: 0.28 },
+              0.72
+            );
+
+            if (cardsEls && cardsEls.length > 0) {
+              tl.to(
+                cardsEls,
+                { y: -30, opacity: 0, stagger: 0.03, duration: 0.28 },
+                0.72
+              );
+            }
+          });
+
+          // 3. Section 05: Footer (#contact) — ENTRADA e PERMANÊNCIA
+          const contactEl = document.querySelector('#contact');
+          const contactH3 = document.querySelector('#contact h3');
+          const contactP = document.querySelector('#contact p');
+
+          if (contactEl && contactH3 && contactP) {
+            contactH3.setAttribute('aria-label', 'Sua ideia merece ganhar forma.');
+            const contactHeadSplit = new SplitText(contactH3, {
+              type: 'lines, words',
+              linesClass: 'split-line',
+              wordsClass: 'split-word',
+            });
+            splits.push(contactHeadSplit);
+
+            const contactPSplit = new SplitText(contactP, {
+              type: 'words',
+              wordsClass: 'reading-word',
+            });
+            splits.push(contactPSplit);
+
+            const contactTl = gsap.timeline({
+              scrollTrigger: {
+                trigger: contactEl,
+                start: 'top 85%',
+                end: 'bottom bottom',
+                scrub: 0.6,
+                invalidateOnRefresh: true,
+              },
+              defaults: { ease: 'none' },
+            });
+
+            contactTl.fromTo(
+              contactHeadSplit.words,
+              { yPercent: 110, rotate: 3, opacity: 0 },
+              { yPercent: 0, rotate: 0, opacity: 1, stagger: 0.035, duration: 0.45 },
+              0
+            );
+
+            contactTl.fromTo(
+              contactPSplit.words,
+              { opacity: 0.15 },
+              { opacity: 1, stagger: 0.02, duration: 0.45 },
+              0.05
+            );
+
+            // Permanência até o fim da página
+            contactTl.to({}, { duration: 0.55 });
+          }
+        });
+
+        ScrollTrigger.refresh();
+      }
+
+      // Initialize SplitText & ScrollTrigger
+      initScrollAnimations();
+
+      // Debounced resize handler
+      let resizeTimer;
+      window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+          ScrollTrigger.refresh();
+        }, 200);
+      });
+
+      // ==========================================
+      // Reveal Animations (IntersectionObserver for remaining UI)
+      // ==========================================
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('is-revealed');
+              observer.unobserve(entry.target);
+            }
+          });
+        },
+        {
+          threshold: 0.25,
+          rootMargin: '0px 0px -50px 0px',
+        }
+      );
+
+      document.querySelectorAll('.reveal').forEach((el) => {
+        observer.observe(el);
+      });
+
+      // ==========================================
+      // Loader and Hero Entrance Sequencer
+      // ==========================================
+      const loader = document.getElementById('loader');
+      const loaderStatus = document.getElementById('loader-status');
+      const loaderBarTrack = document.getElementById('loader-bar-track');
+      const loaderBarFill = document.getElementById('loader-bar-fill');
+      const loaderCounter = document.getElementById('loader-counter');
+
+      const heroHeadline = document.getElementById('hero-headline');
+      const heroRight = document.getElementById('hero-right');
+
+      let sceneReady = false;
+      let loaderFinished = false;
+      let progressVal = 0;
+      let lastTime = performance.now();
+
+      // Trigger spring-in of loader elements on load
+      setTimeout(() => {
+        loaderStatus.style.opacity = '1';
+        loaderStatus.style.transform = 'translateY(0)';
+        loaderStatus.style.filter = 'blur(0)';
+
+        loaderBarTrack.style.opacity = '1';
+        loaderBarTrack.style.transform = 'translateY(0)';
+        loaderBarTrack.style.filter = 'blur(0)';
+
+        loaderCounter.style.opacity = '1';
+        loaderCounter.style.transform = 'translateY(0)';
+        loaderCounter.style.filter = 'blur(0)';
+      }, 100);
+
+      function loaderFrame(now) {
+        const dt = Math.min((now - lastTime) / 1000, 0.05);
+        lastTime = now;
+
+        if (!sceneReady) {
+          // Eases toward ceiling of 92% on its own
+          progressVal += (92 - progressVal) * 1.7 * dt;
+        } else {
+          // Once ready, accelerates toward 100%
+          progressVal += (100 - progressVal) * 6.0 * dt;
+          if (progressVal >= 99.4) {
+            progressVal = 100;
+          }
+        }
+
+        const displayInt = Math.min(100, Math.floor(progressVal));
+        loaderCounter.textContent = `${String(displayInt).padStart(3, '0')}%`;
+        loaderBarFill.style.width = `${progressVal}%`;
+
+        if (progressVal >= 100 && loaderStatus.textContent !== 'Entrando na experiência') {
+          loaderStatus.textContent = 'Entrando na experiência';
+        }
+
+        if (progressVal >= 99.9 && sceneReady && !loaderFinished) {
+          loaderFinished = true;
+
+          // After 140ms set loader to leaving
+          setTimeout(() => {
+            loader.style.opacity = '0';
+            loader.style.pointerEvents = 'none';
+
+            // After 140 + 520ms reveal header + hero and trigger scene start
+            setTimeout(() => {
+              control.started = true;
+              revealHeroAndHeader();
+            }, 520);
+          }, 140);
+          return;
+        }
+
+        if (!loaderFinished) {
+          requestAnimationFrame(loaderFrame);
+        }
+      }
+      requestAnimationFrame(loaderFrame);
+
+      function revealHeroAndHeader() {
+        // Floating Navbar in over 0.8s
+        const navbarWrapper = document.getElementById('navbar-wrapper');
+        if (navbarWrapper) {
+          navbarWrapper.style.opacity = '1';
+          navbarWrapper.style.transform = 'translateY(0)';
+        }
+
+        if (prefersReducedMotion) {
+          if (heroHeadline) heroHeadline.style.opacity = '1';
+          if (heroRight) heroRight.style.opacity = '1';
+          return;
+        }
+
+        // Hero automatic entrance on load with SplitText mask
+        if (heroSplitInstance && heroSplitInstance.words) {
+          gsap.fromTo(
+            heroSplitInstance.words,
+            { yPercent: 110, rotate: 3, opacity: 0 },
+            {
+              yPercent: 0,
+              rotate: 0,
+              opacity: 1,
+              duration: 1.15,
+              ease: 'power4.out',
+              stagger: 0.05,
+              delay: 0.1,
+              onComplete: () => {
+                // Attach single hero exit timeline once entrance completes
+                if (heroTimeline) heroTimeline.kill();
+                heroTimeline = gsap.timeline({
+                  scrollTrigger: {
+                    trigger: '#hero',
+                    start: 'top top',
+                    end: 'bottom 20%',
+                    scrub: 0.6,
+                    invalidateOnRefresh: true,
+                  },
+                  defaults: { ease: 'none' },
+                });
+
+                heroTimeline
+                  .to({}, { duration: 0.25 }) // Permanência no topo
+                  .to(
+                    heroSplitInstance.words,
+                    { yPercent: -60, opacity: 0, stagger: 0.02, duration: 0.75 },
+                    0.25
+                  )
+                  .to('#hero-right', { y: -40, opacity: 0, duration: 0.75 }, 0.25);
+              },
+            }
+          );
+        }
+
+        if (heroRight) {
+          gsap.fromTo(
+            heroRight,
+            { y: 25, opacity: 0 },
+            {
+              y: 0,
+              opacity: 1,
+              duration: 1.0,
+              delay: 0.25,
+              ease: 'power3.out',
+            }
+          );
+        }
+      }
+
+      // ==========================================
+      // Studio Controls Drawer Logic
+      // ==========================================
+      const btnOpenDrawer = document.getElementById('btn-open-drawer');
+      const btnCloseDrawer = document.getElementById('btn-close-drawer');
+      const drawer = document.getElementById('controls-drawer');
+      const scrim = document.getElementById('drawer-scrim');
+      const themeCardsContainer = document.getElementById('theme-cards-list');
+      const btnResetTheme = document.getElementById('btn-reset-theme');
+
+      function openDrawer() {
+        drawer.style.transform = 'translateX(0)';
+        scrim.style.opacity = '0.4';
+        scrim.style.pointerEvents = 'auto';
+      }
+
+      function closeDrawer() {
+        drawer.style.transform = 'translateX(100%)';
+        scrim.style.opacity = '0';
+        scrim.style.pointerEvents = 'none';
+      }
+
+      btnOpenDrawer.addEventListener('click', openDrawer);
+      btnCloseDrawer.addEventListener('click', closeDrawer);
+      scrim.addEventListener('click', closeDrawer);
+
+      function renderThemeCards() {
+        themeCardsContainer.innerHTML = '';
+        THEMES.forEach((theme) => {
+          const isSelected = theme.id === selectedThemeId;
+          const card = document.createElement('div');
+          card.style.borderRadius = '0.75rem';
+          card.style.padding = '1rem';
+          card.style.cursor = 'pointer';
+          card.style.transition = 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)';
+          card.style.border = isSelected ? '1px solid #0a0a0a' : '1px solid rgba(0,0,0,0.08)';
+          card.style.backgroundColor = isSelected ? '#0a0a0a' : 'rgba(255, 255, 255, 0.6)';
+          card.style.color = isSelected ? '#ffffff' : '#0a0a0a';
+          card.style.transform = isSelected ? 'scale(1.02)' : 'scale(1)';
+          if (isSelected) {
+            card.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.12)';
+          }
+
+          card.innerHTML = `
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.35rem;">
+              <span class="font-raleway" style="font-weight: 700; font-size: 13px;">${theme.name}</span>
+              <span style="width: 12px; height: 12px; border-radius: 9999px; background-color: ${theme.primaryColor}; display: inline-block; box-shadow: 0 0 6px ${theme.primaryColor}88;"></span>
+            </div>
+            <p style="margin: 0; font-size: 11px; line-height: 1.4; color: ${isSelected ? 'rgba(255,255,255,0.7)' : '#71717a'};">
+              ${theme.description}
+            </p>
+          `;
+
+          card.addEventListener('click', () => {
+            selectTheme(theme.id);
+          });
+
+          themeCardsContainer.appendChild(card);
+        });
+      }
+
+      function selectTheme(themeId) {
+        selectedThemeId = themeId;
+        const theme = THEMES.find((t) => t.id === themeId);
+        if (theme) {
+          currentBallColor = theme.ballColor;
+          updateBackgroundGradient(currentStage);
+          renderThemeCards();
+          rebuildThreeScene(theme.ballColor);
+        }
+      }
+
+      btnResetTheme.addEventListener('click', () => {
+        selectTheme('roseGold');
+      });
+
+      renderThemeCards();
+
+      // ==========================================
+      // WebGL Three.js Scene Engine
+      // ==========================================
+      const container = document.getElementById('canvas-container');
+      const canvas = document.getElementById('webgl-canvas');
+
+      let currentSceneCleanup = null;
+
+      function createThreeScene(ballColor) {
+        if (currentSceneCleanup) {
+          currentSceneCleanup();
+        }
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(
+          38,
+          container.clientWidth / container.clientHeight,
+          0.1,
+          100
+        );
+        camera.position.set(0, 0, 11);
+
+        const renderer = new THREE.WebGLRenderer({
+          canvas,
+          antialias: true,
+          alpha: true,
+          powerPreference: 'high-performance',
+        });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.15;
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+        const hemiLight = new THREE.HemisphereLight(0xffffff, new THREE.Color(ballColor), 1.6);
+        scene.add(hemiLight);
+
+        const keyLight = new THREE.DirectionalLight(0xffffff, 1.4);
+        keyLight.position.set(-6, 10, 8);
+        keyLight.castShadow = true;
+        keyLight.shadow.mapSize.width = 2048;
+        keyLight.shadow.mapSize.height = 2048;
+        keyLight.shadow.camera.near = 0.5;
+        keyLight.shadow.camera.far = 30;
+        keyLight.shadow.camera.left = -8;
+        keyLight.shadow.camera.right = 8;
+        keyLight.shadow.camera.top = 8;
+        keyLight.shadow.camera.bottom = -8;
+        keyLight.shadow.bias = -0.0003;
+        keyLight.shadow.radius = 12.0;
+        scene.add(keyLight);
+
+        const rimLight = new THREE.DirectionalLight(0xffffff, 1.25);
+        rimLight.position.set(8, 7, -8);
+        scene.add(rimLight);
+
+        const frontLight = new THREE.DirectionalLight(0xffffff, 0.4);
+        frontLight.position.set(0, 0, 11);
+        scene.add(frontLight);
+
+        const sideBounceLight = new THREE.DirectionalLight(0xffffff, 0.3);
+        sideBounceLight.position.set(-9, -2, 4);
+        scene.add(sideBounceLight);
+
+        let viewportWidth = 10;
+        let viewportHeight = 6;
+        const updateFrustumBounds = () => {
+          const fovRad = THREE.MathUtils.degToRad(camera.fov);
+          viewportHeight = 2 * Math.tan(fovRad / 2) * camera.position.z;
+          viewportWidth = viewportHeight * (container.clientWidth / container.clientHeight);
+        };
+        updateFrustumBounds();
+
+        const isMobile = window.innerWidth < 768;
+        const ballCount = isMobile ? 54 : 96;
+
+        const getDynamicColors = (baseColor) => {
+          const hex = baseColor.toLowerCase();
+          if (hex === '#e1fc03') {
+            return {
+              pastel: new THREE.Color('#FBFFE2'),
+              light: new THREE.Color('#EFFE69'),
+              medium: new THREE.Color('#E1FC03'),
+              deep: new THREE.Color('#B1E200'),
+              glass: new THREE.Color('#DCFF32'),
+            };
+          } else if (hex === '#ffc5c2' || hex === '#ffa19e') {
+            return {
+              pastel: new THREE.Color('#FFF5F4'),
+              light: new THREE.Color('#FFECEB'),
+              medium: new THREE.Color('#FFA6B3'),
+              deep: new THREE.Color('#FF4D6D'),
+              glass: new THREE.Color('#FFA6B3'),
+            };
+          } else if (hex === '#96e5ff') {
+            return {
+              pastel: new THREE.Color('#F0F9FF'),
+              light: new THREE.Color('#C9F1FF'),
+              medium: new THREE.Color('#96E5FF'),
+              deep: new THREE.Color('#2BA5FF'),
+              glass: new THREE.Color('#98E4FF'),
+            };
+          } else if (hex === '#2f69ff') {
+            return {
+              pastel: new THREE.Color('#ECEFFF'),
+              light: new THREE.Color('#A8C1FF'),
+              medium: new THREE.Color('#2F69FF'),
+              deep: new THREE.Color('#0A33BF'),
+              glass: new THREE.Color('#4D80FF'),
+            };
+          } else if (hex === '#141414' || hex === '#000000') {
+            return {
+              pastel: new THREE.Color('#D8D8D8'),
+              light: new THREE.Color('#555555'),
+              medium: new THREE.Color('#242424'),
+              deep: new THREE.Color('#0A0A0A'),
+              glass: new THREE.Color('#1F1F1F'),
+            };
+          }
+          const c = new THREE.Color(baseColor);
+          return {
+            pastel: c.clone().offsetHSL(0, -0.15, 0.25),
+            light: c.clone().offsetHSL(0, -0.05, 0.12),
+            medium: c.clone(),
+            deep: c.clone().offsetHSL(0.01, 0.1, -0.12),
+            glass: c.clone(),
+          };
+        };
+
+        const palette = getDynamicColors(ballColor);
+        const isBlack = ['#141414', '#18181b', '#000000'].includes(ballColor.toLowerCase());
+
+        const palHero = palette;
+        const palLime = getDynamicColors('#E1FC03');
+        const palPink = getDynamicColors('#FFC5C2');
+        const ROLES = ['pastel', 'light', 'medium', 'deep', 'glass'];
+        const curPal = {
+          pastel: new THREE.Color(),
+          light: new THREE.Color(),
+          medium: new THREE.Color(),
+          deep: new THREE.Color(),
+          glass: new THREE.Color(),
+        };
+
+        const sphereGeometry = new THREE.SphereGeometry(1, 48, 48);
+        const balls = [];
+        for (let i = 0; i < ballCount; i++) {
+          let radius = 0.33;
+          const rand = Math.random();
+          if (rand < 0.3) radius = 0.27 + Math.random() * 0.12;
+          else if (rand < 0.8) radius = 0.42 + Math.random() * 0.18;
+          else radius = 0.66 + Math.random() * 0.21;
+
+          const mass = Math.pow(radius, 3);
+
+          let chosenColor = palette.medium;
+          let color = palette.medium;
+          let sphereMat;
+          let role = 'medium';
+
+          const isGlass = Math.random() < 0.22 && !isBlack;
+
+          if (isGlass) {
+            sphereMat = new THREE.MeshPhysicalMaterial({
+              color: palette.glass,
+              roughness: 0.08,
+              metalness: 0.0,
+              clearcoat: 1.0,
+              clearcoatRoughness: 0.03,
+              transmission: 0.95,
+              ior: 1.485,
+              thickness: 2.2,
+              specularColor: new THREE.Color('#ffffff'),
+              specularIntensity: 1.0,
+              attenuationColor: palette.pastel,
+              attenuationDistance: 1.0,
+              emissive: palette.glass,
+              emissiveIntensity: 0.12,
+              transparent: true,
+            });
+            color = palette.glass;
+            role = 'glass';
+          } else {
+            const colorRand = Math.random();
+            if (colorRand < 0.25) {
+              chosenColor = palette.pastel;
+              role = 'pastel';
+            } else if (colorRand < 0.55) {
+              chosenColor = palette.light;
+              role = 'light';
+            } else if (colorRand < 0.85) {
+              chosenColor = palette.medium;
+              role = 'medium';
+            } else {
+              chosenColor = palette.deep;
+              role = 'deep';
+            }
+
+            sphereMat = new THREE.MeshPhysicalMaterial({
+              color: chosenColor,
+              roughness: 0.44,
+              metalness: 0.0,
+              clearcoat: 0.24,
+              clearcoatRoughness: 0.35,
+              emissive: isBlack ? new THREE.Color('#000000') : chosenColor,
+              emissiveIntensity: isBlack ? 0.0 : 0.08,
+              transparent: true,
+            });
+            color = chosenColor;
+          }
+
+          const group = new THREE.Group();
+          const sphereMesh = new THREE.Mesh(sphereGeometry, sphereMat);
+          sphereMesh.scale.setScalar(radius);
+          sphereMesh.castShadow = true;
+          sphereMesh.receiveShadow = true;
+          group.add(sphereMesh);
+          scene.add(group);
+
+          balls.push({
+            id: i,
+            radius,
+            mass,
+            position: new THREE.Vector3(0, 0, 0),
+            velocity: new THREE.Vector3(),
+            meshGroup: group,
+            sphere: sphereMesh,
+            material: sphereMat,
+            role,
+            isGlass,
+            visualScale: radius,
+            color,
+            restPosition: new THREE.Vector3(0, 0, 0),
+            shapeTarget: new THREE.Vector3(),
+            angleY: Math.random() * Math.PI * 2,
+            angleZ: 0.1 + Math.random() * 0.45,
+          });
+        }
+
+        const meanRadius = balls.reduce((sum, b) => sum + b.radius, 0) / balls.length;
+        let shapeScale = 1;
+
+        const inHeart = (x, y) => {
+          const a = x * x + y * y - 1;
+          return a * a * a - x * x * y * y * y <= 0;
+        };
+
+        const assignHeartTargets = () => {
+          const S = Math.min(viewportWidth * 0.3, viewportHeight * 0.27);
+          const baseCY = -viewportHeight * 0.03;
+          shapeScale = Math.max(0.3, Math.min(1, (S * 0.45 / 2.3) / meanRadius));
+          for (let i = 0; i < balls.length; i++) {
+            let x = 0,
+              y = 0,
+              tries = 0;
+            do {
+              x = (Math.random() * 2 - 1) * 1.25;
+              y = Math.random() * 2.55 - 1.4;
+              tries++;
+            } while (!inHeart(x, y) && tries < 60);
+            balls[i].shapeTarget.set(x * S, (y + 0.12) * S + baseCY, (Math.random() - 0.5) * 0.35);
+          }
+        };
+        assignHeartTargets();
+
+        const scatterFar = (withInwardVelocity) => {
+          const R = Math.max(viewportWidth, viewportHeight) * 1.5;
+          for (const b of balls) {
+            const a = Math.random() * Math.PI * 2;
+            const px = Math.cos(a) * R * 1.25;
+            const py = Math.sin(a) * R * 0.85;
+            const pz = (Math.random() - 0.5) * 4;
+            b.position.set(px, py, pz);
+            b.meshGroup.position.copy(b.position);
+            if (withInwardVelocity) {
+              b.velocity.set(-px, -py, -pz).normalize().multiplyScalar(0.08 + Math.random() * 0.05);
+            } else {
+              b.velocity.set(0, 0, 0);
+            }
+          }
+        };
+
+        // If control has already started, let them start inside, otherwise park far offscreen
+        if (control.started) {
+          scatterFar(true);
+        } else {
+          scatterFar(false);
+        }
+
+        const params = {
+          gravity: 0,
+          rebound: -0.3,
+          mouseRepelForce: 0.05,
+          mouseRepelRadius: 4.4,
+          damping: 0.91,
+          centerAttractForce: 0.0035,
+          bounciness: 0.02,
+        };
+
+        const mouseProjVec = new THREE.Vector3();
+        const mouseWorld3D = new THREE.Vector3();
+        const updateMouse3D = () => {
+          if (!mousePos) return;
+          mouseProjVec.set(mousePos.x, mousePos.y, 0.5);
+          mouseProjVec.unproject(camera);
+          const dir = mouseProjVec.sub(camera.position).normalize();
+          const distance = -camera.position.z / dir.z;
+          mouseWorld3D.copy(camera.position).add(dir.multiplyScalar(distance));
+        };
+
+        const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
+        const smoothstep = (a, b, x) => {
+          const t = clamp01((x - a) / (b - a));
+          return t * t * (3 - 2 * t);
+        };
+        const lerp = (a, b, t) => a + (b - a) * t;
+        const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
+
+        let animationFrameId = 0;
+        const clock = new THREE.Clock();
+        let localStarted = control.started;
+        let entranceStart = localStarted ? clock.getElapsedTime() : 0;
+        let reportedReady = false;
+
+        const onReady = () => {
+          sceneReady = true;
+          if (typeof ScrollTrigger !== 'undefined') {
+            ScrollTrigger.refresh();
+          }
+        };
+
+        const diffVec = new THREE.Vector3();
+        const collideDiff = new THREE.Vector3();
+        const relVel = new THREE.Vector3();
+        const deltaPos = new THREE.Vector3();
+        const rotAxis = new THREE.Vector3();
+        const prevMouseWorld = new THREE.Vector3();
+        let mouseSpeed = 0;
+
+        const simulateAndRender = () => {
+          animationFrameId = requestAnimationFrame(simulateAndRender);
+
+          const time = clock.getElapsedTime();
+          clock.getDelta();
+          updateMouse3D();
+
+          const ctrl = control;
+
+          if (ctrl?.started && !localStarted) {
+            localStarted = true;
+            entranceStart = time;
+            scatterFar(true);
+          }
+
+          if (!localStarted) {
+            renderer.render(scene, camera);
+            if (!reportedReady) {
+              reportedReady = true;
+              onReady();
+            }
+            return;
+          }
+
+          const progress = ctrl?.progress ?? 0;
+
+          // Mode blend factors
+          const heroF = 1 - smoothstep(0.3, 0.8, progress);
+          const dropRaw = smoothstep(0.4, 0.95, progress);
+          const flyF = smoothstep(2.7, 3.45, progress);
+          const shapeF = smoothstep(1.4, 2.05, progress) * (1 - smoothstep(2.55, 3.0, progress));
+          const dropF = dropRaw * (1 - smoothstep(1.25, 1.75, progress));
+
+          // Scroll-driven palette morph: hero -> volt-lime -> rose-pink
+          const bLime = smoothstep(0.55, 1.05, progress);
+          const bPink = smoothstep(1.4, 1.95, progress);
+          for (const role of ROLES) {
+            curPal[role].copy(palHero[role]).lerp(palLime[role], bLime).lerp(palPink[role], bPink);
+          }
+          hemiLight.groundColor.copy(curPal.medium);
+
+          const entranceT = easeOutCubic(clamp01((time - entranceStart) / 2.2));
+          const attractionBoost = lerp(7.5, 1, entranceT);
+
+          const isMouseInteracting =
+            !!mousePos && (Math.abs(mousePos.x) < 0.99 || Math.abs(mousePos.y) < 0.99);
+
+          mouseSpeed = isMouseInteracting ? mouseWorld3D.distanceTo(prevMouseWorld) : 0;
+          if (mouseSpeed > 3) mouseSpeed = 3;
+          prevMouseWorld.copy(mouseWorld3D);
+
+          let damping = 0.91;
+          damping = lerp(damping, 0.992, dropF);
+          damping = lerp(damping, 0.9, shapeF);
+          damping = lerp(damping, 0.985, flyF);
+
+          const camZ = camera.position.z;
+          const clusterActive = Math.max(heroF, entranceT < 1 ? 1 : 0);
+
+          // 1. ACCELERATIONS
+          for (let i = 0; i < balls.length; i++) {
+            const b = balls[i];
+
+            if (heroF > 0.01) {
+              b.velocity.x += Math.sin(time * 0.4 + b.id * 1.5) * 0.0004 * b.radius * heroF;
+              b.velocity.y += Math.cos(time * 0.5 + b.id * 1.2) * 0.0004 * b.radius * heroF;
+              b.velocity.z += Math.sin(time * 0.35 + b.id) * 0.0001 * heroF;
+            }
+
+            const clusterStrength = params.centerAttractForce * attractionBoost * clusterActive;
+            if (clusterStrength > 0.00001) {
+              b.velocity.x += (0 - b.position.x) * clusterStrength * 0.38;
+              b.velocity.y += (0 - b.position.y) * clusterStrength * 1.85;
+              b.velocity.z += (0 - b.position.z) * clusterStrength * 1.8;
+            }
+
+            if (dropF > 0.001) {
+              b.velocity.y -= 0.011 * dropF;
+            }
+
+            if (shapeF > 0.001) {
+              const k = 0.06 * shapeF;
+              b.velocity.x += (b.shapeTarget.x - b.position.x) * k;
+              b.velocity.y += (b.shapeTarget.y - b.position.y) * k;
+              b.velocity.z += (b.shapeTarget.z - b.position.z) * k;
+            }
+
+            if (flyF > 0.001) {
+              const stagger = (b.id * 0.6180339887) % 1;
+              const local = smoothstep(stagger * 0.55, stagger * 0.55 + 0.45, flyF);
+              b.velocity.z += 0.05 * local;
+              b.velocity.x += b.position.x * 0.006 * local;
+              b.velocity.y += b.position.y * 0.006 * local;
+            }
+
+            if (mousePos && isMouseInteracting) {
+              diffVec.subVectors(b.position, mouseWorld3D);
+              const rawDist = diffVec.length();
+              const down = mousePos.isDown;
+              const activeRepelRadius = down
+                ? params.mouseRepelRadius * 1.4
+                : params.mouseRepelRadius;
+              const activeRepelForce = down ? params.mouseRepelForce * 1.7 : params.mouseRepelForce;
+              if (rawDist < activeRepelRadius && rawDist > 0.0001) {
+                const ratio = rawDist / activeRepelRadius;
+                const smoothFactor = 1.0 - ratio * ratio * (3.0 - 2.0 * ratio);
+                const speedBoost = 1 + mouseSpeed * 3.2;
+                const push = smoothFactor * activeRepelForce * speedBoost;
+                diffVec.normalize();
+                diffVec.z *= 0.12;
+                diffVec.normalize();
+                b.velocity.addScaledVector(diffVec, push);
+              }
+            }
+
+            b.velocity.multiplyScalar(damping);
+            b.position.addScaledVector(b.velocity, 1);
+
+            const c = b.isGlass ? curPal.glass : curPal[b.role];
+            b.material.color.copy(c);
+            if (!isBlack) b.material.emissive.copy(c);
+
+            b.material.opacity =
+              flyF > 0.001 ? 1 - smoothstep(camZ - 2.6, camZ - 0.3, b.position.z) : 1;
+
+            const targetVis = b.radius * (1 - (1 - shapeScale) * shapeF);
+            b.visualScale += (targetVis - b.visualScale) * 0.12;
+            b.sphere.scale.setScalar(b.visualScale);
+          }
+
+          // 2. PAIRWISE COLLISIONS
+          const collideScale = 0.28 * (1 - 0.93 * shapeF) * (1 - flyF);
+          const subSteps = 4;
+          for (let step = 0; step < subSteps; step++) {
+            for (let i = 0; i < balls.length; i++) {
+              for (let j = i + 1; j < balls.length; j++) {
+                const b1 = balls[i];
+                const b2 = balls[j];
+                collideDiff.subVectors(b2.position, b1.position);
+                const dist = collideDiff.length();
+                const minDist = b1.visualScale + b2.visualScale;
+                if (dist < minDist && dist > 0.001) {
+                  const overlap = minDist - dist;
+                  collideDiff.multiplyScalar(1 / dist);
+                  const totalMass = b1.mass + b2.mass;
+                  const ratio1 = b2.mass / totalMass;
+                  const ratio2 = b1.mass / totalMass;
+                  b1.position.addScaledVector(collideDiff, -overlap * ratio1 * collideScale);
+                  b2.position.addScaledVector(collideDiff, overlap * ratio2 * collideScale);
+
+                  relVel.subVectors(b2.velocity, b1.velocity);
+                  const velAlongNormal = relVel.dot(collideDiff);
+                  if (velAlongNormal < -0.0001) {
+                    const impulse =
+                      (-(1 + params.bounciness) * velAlongNormal) /
+                      (1 / b1.mass + 1 / b2.mass);
+                    b1.velocity.addScaledVector(collideDiff, -impulse / b1.mass);
+                    b2.velocity.addScaledVector(collideDiff, impulse / b2.mass);
+                  }
+                }
+              }
+            }
+          }
+
+          // 3. VIEWPORT WALLS + BOUNCY FLOOR
+          const borderPad = 0.2;
+          const xBound = viewportWidth / 2 - borderPad;
+          const topY = viewportHeight / 2 - 0.05;
+          const floorY = -viewportHeight / 2 + 0.05;
+          const zBound = 2.0;
+          const restitution = 0.3 + 0.35 * dropF;
+
+          const contain = flyF < 0.5;
+          const zContain = flyF < 0.02;
+
+          for (let i = 0; i < balls.length; i++) {
+            const b = balls[i];
+            const r = b.visualScale;
+
+            if (contain) {
+              if (b.position.x < -xBound - r) {
+                b.position.x = -xBound - r;
+                b.velocity.x *= params.rebound;
+              } else if (b.position.x > xBound + r) {
+                b.position.x = xBound + r;
+                b.velocity.x *= params.rebound;
+              }
+
+              if (b.position.y - r < floorY) {
+                b.position.y = floorY + r;
+                if (b.velocity.y < 0) b.velocity.y = -b.velocity.y * restitution;
+                if (dropF > 0.3) {
+                  b.velocity.x *= 0.86;
+                  b.velocity.z *= 0.86;
+                }
+              }
+              if (b.position.y + r > topY) {
+                b.position.y = topY - r;
+                if (b.velocity.y > 0) b.velocity.y *= params.rebound;
+              }
+            }
+
+            if (zContain) {
+              if (b.position.z < -zBound) {
+                b.position.z = -zBound;
+                b.velocity.z *= params.rebound;
+              } else if (b.position.z > zBound) {
+                b.position.z = zBound;
+                b.velocity.z *= params.rebound;
+              }
+            }
+
+            deltaPos.copy(b.position).sub(b.meshGroup.position);
+            if (deltaPos.lengthSq() > 0.000001) {
+              rotAxis.set(deltaPos.y, -deltaPos.x, 0).normalize();
+              const rotAngle = (deltaPos.length() / b.radius) * 0.95;
+              b.meshGroup.rotateOnWorldAxis(rotAxis, rotAngle);
+            }
+            b.meshGroup.position.copy(b.position);
+          }
+
+          renderer.render(scene, camera);
+          if (!reportedReady) {
+            reportedReady = true;
+            onReady();
+          }
+        };
+
+        simulateAndRender();
+
+        const handleResize = () => {
+          const width = container.clientWidth;
+          const height = container.clientHeight;
+          camera.aspect = width / height;
+          camera.updateProjectionMatrix();
+          renderer.setSize(width, height);
+          updateFrustumBounds();
+          assignHeartTargets();
+        };
+
+        const resizeObserver = new ResizeObserver(handleResize);
+        resizeObserver.observe(container);
+
+        currentSceneCleanup = () => {
+          cancelAnimationFrame(animationFrameId);
+          resizeObserver.disconnect();
+          balls.forEach((b) => {
+            b.sphere.geometry.dispose();
+            b.material.dispose();
+            scene.remove(b.meshGroup);
+          });
+          renderer.dispose();
+        };
+      }
+
+      function rebuildThreeScene(color) {
+        createThreeScene(color);
+      }
+
+      // Initialize initial scene with Royal Blue
+      createThreeScene(currentBallColor);
+    </script>
+  </body>
+</html>
