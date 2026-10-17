@@ -331,6 +331,42 @@
         color: #ffffff;
       }
 
+      /* Floating Navbar Responsive Display */
+      #contact-header-btn {
+        display: none !important;
+      }
+      #btn-mobile-menu {
+        display: flex !important;
+      }
+      #desktop-nav {
+        display: none !important;
+      }
+
+      @media (min-width: 768px) {
+        #contact-header-btn {
+          display: inline-flex !important;
+        }
+        #btn-mobile-menu {
+          display: none !important;
+        }
+        #desktop-nav {
+          display: flex !important;
+        }
+      }
+
+      @media (max-width: 767px) {
+        #navbar-wrapper {
+          padding: 0 0.85rem;
+        }
+        #main-header {
+          height: 3.85rem;
+          padding: 0 0.85rem 0 1.25rem !important;
+        }
+        .header-logo-img {
+          height: 38px !important;
+        }
+      }
+
       @supports not (backdrop-filter: blur(1px)) {
         #main-header {
           background: rgba(255, 255, 255, 0.95);
@@ -568,7 +604,6 @@
             class="glass-pill font-raleway group"
             id="contact-header-btn"
             style="
-              display: inline-flex;
               align-items: center;
               padding-left: 1.2rem;
               padding-right: 0.35rem;
@@ -1520,10 +1555,11 @@
         const header = document.getElementById('main-header');
         const desktopNav = document.getElementById('desktop-nav');
         const btnMobileMenu = document.getElementById('btn-mobile-menu');
+        const contactHeaderBtn = document.getElementById('contact-header-btn');
         const contactBtnLabel = document.getElementById('contact-btn-label');
         if (header) {
           header.style.height = isDesktop ? '4.5rem' : '3.85rem';
-          header.style.padding = isDesktop ? '0 1.5rem 0 2rem' : '0 0.75rem 0 1.15rem';
+          header.style.padding = isDesktop ? '0 1.5rem 0 2rem' : '0 0.85rem 0 1.25rem';
         }
         if (desktopNav) {
           desktopNav.style.display = isDesktop ? 'flex' : 'none';
@@ -1531,8 +1567,11 @@
         if (btnMobileMenu) {
           btnMobileMenu.style.display = isDesktop ? 'none' : 'flex';
         }
+        if (contactHeaderBtn) {
+          contactHeaderBtn.style.display = isDesktop ? 'inline-flex' : 'none';
+        }
         if (contactBtnLabel) {
-          contactBtnLabel.textContent = isDesktop ? 'Solicitar orçamento' : 'Orçamento';
+          contactBtnLabel.textContent = 'Solicitar orçamento';
         }
 
         // Hero
@@ -1718,6 +1757,14 @@
               l.style.transitionDelay = '0s';
             }
           });
+        }
+        const hamburgerIcon = document.getElementById('hamburger-icon');
+        if (hamburgerIcon) {
+          if (mobileDrawerOpen) {
+            hamburgerIcon.innerHTML = '<line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>';
+          } else {
+            hamburgerIcon.innerHTML = '<line x1="4" x2="20" y1="12" y2="12"></line><line x1="4" x2="20" y1="6" y2="6"></line><line x1="4" x2="20" y1="18" y2="18"></line>';
+          }
         }
       }
 
