@@ -11,3 +11,8 @@ coverage/
 
 .vercel
 .env*
+
+.npm-cache/
+coverage/
+.vscode/
+*.zip
