@@ -48,18 +48,24 @@ export function createBalloonScene(
   );
   camera.position.set(0, 0, 11);
 
+  const isMobile = window.innerWidth < 800;
+  const ballCount = isMobile ? 18 : window.innerWidth < 1024 ? 32 : 44;
+
   const renderer = new THREE.WebGLRenderer({
     canvas,
-    antialias: true,
+    antialias: !isMobile,
     alpha: true,
     powerPreference: "high-performance",
   });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.25 : 1.5));
   renderer.setSize(container.clientWidth, container.clientHeight, false);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.15;
-  renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFShadowMap;
+  renderer.shadowMap.enabled = !isMobile;
+  if (!isMobile) {
+    renderer.shadowMap.type = THREE.PCFShadowMap;
+    renderer.shadowMap.autoUpdate = false;
+  }
 
   const hemiLight = new THREE.HemisphereLight(
     0xffffff,
@@ -70,17 +76,21 @@ export function createBalloonScene(
 
   const keyLight = new THREE.DirectionalLight(0xffffff, 1.4);
   keyLight.position.set(-6, 10, 8);
-  keyLight.castShadow = true;
-  keyLight.shadow.mapSize.width = 1024;
-  keyLight.shadow.mapSize.height = 1024;
-  keyLight.shadow.camera.near = 0.5;
-  keyLight.shadow.camera.far = 30;
-  keyLight.shadow.camera.left = -8;
-  keyLight.shadow.camera.right = 8;
-  keyLight.shadow.camera.top = 8;
-  keyLight.shadow.camera.bottom = -8;
-  keyLight.shadow.bias = -0.0003;
-  keyLight.shadow.radius = 12.0;
+  if (!isMobile) {
+    keyLight.castShadow = true;
+    keyLight.shadow.mapSize.width = 1024;
+    keyLight.shadow.mapSize.height = 1024;
+    keyLight.shadow.camera.near = 0.5;
+    keyLight.shadow.camera.far = 30;
+    keyLight.shadow.camera.left = -8;
+    keyLight.shadow.camera.right = 8;
+    keyLight.shadow.camera.top = 8;
+    keyLight.shadow.camera.bottom = -8;
+    keyLight.shadow.bias = -0.0003;
+    keyLight.shadow.radius = 8.0;
+  } else {
+    keyLight.castShadow = false;
+  }
   scene.add(keyLight);
 
   const rimLight = new THREE.DirectionalLight(0xffffff, 1.25);
@@ -109,9 +119,6 @@ export function createBalloonScene(
     camera.position.y = mobile ? viewportHeight * 0.24 : 0;
   };
   updateFrustumBounds();
-
-  const isMobile = window.innerWidth < 768;
-  const ballCount = isMobile ? 24 : window.innerWidth < 1024 ? 36 : 48;
 
   const getDynamicColors = (baseColor: string) => {
     const hex = baseColor.toLowerCase();
@@ -427,7 +434,6 @@ export function createBalloonScene(
       return;
     }
 
-    updateScrollPhysics();
     const progress = ctrl?.progress ?? 0;
     const releaseF = ctrl?.releaseFocus ?? 0;
     const textWorldY = (ctrl?.releaseCenterNormY ?? 0) * (viewportHeight * 0.5);
@@ -591,7 +597,7 @@ export function createBalloonScene(
 
     // 2. PAIRWISE COLLISIONS
     const collideScale = 0.28 * (1 - 0.93 * shapeF) * (1 - flyF);
-    const subSteps = 3;
+    const subSteps = isMobile ? 1 : 2;
     for (let step = 0; step < subSteps; step++) {
       for (let i = 0; i < balls.length; i++) {
         for (let j = i + 1; j < balls.length; j++) {
@@ -686,19 +692,63 @@ export function createBalloonScene(
       b.meshGroup.position.copy(b.position);
     }
 
+    if (!isMobile && entranceT < 1.0) {
+      renderer.shadowMap.needsUpdate = true;
+    }
+
     renderer.render(scene, camera);
     if (!reportedReady) {
       reportedReady = true;
       onReady();
     }
+
+    // Check if the simulation can sleep to save CPU and drop TBT to zero
+    let maxSpeedSq = 0;
+    for (let i = 0; i < balls.length; i++) {
+      const v = balls[i].velocity;
+      const s = v.x * v.x + v.y * v.y + v.z * v.z;
+      if (s > maxSpeedSq) maxSpeedSq = s;
+    }
+
+    const canSleep =
+      entranceT >= 1 &&
+      !isMouseInteracting &&
+      heroF > 0.98 &&
+      maxSpeedSq < 0.0001;
+
+    if (canSleep) {
+      settleFrames++;
+      if (settleFrames > 20) {
+        animationFrameId = 0;
+        return;
+      }
+    } else {
+      settleFrames = 0;
+    }
   };
 
   let visible = true,
-    lastFrame = 0;
+    lastFrame = 0,
+    settleFrames = 0;
   const resume = () => {
     if (!disposed && visible && !document.hidden && !animationFrameId)
       simulateAndRender();
   };
+
+  const wakeUp = () => {
+    if (disposed || !visible || document.hidden) return;
+    settleFrames = 0;
+    if (!animationFrameId) {
+      lastFrame = performance.now();
+      if (!isMobile) renderer.shadowMap.needsUpdate = true;
+      animationFrameId = requestAnimationFrame(simulateAndRender);
+    }
+  };
+
+  window.addEventListener("scroll", wakeUp, { passive: true });
+  window.addEventListener("pointermove", wakeUp, { passive: true });
+  window.addEventListener("pointerdown", wakeUp, { passive: true });
+  window.addEventListener("resize", wakeUp, { passive: true });
   document.addEventListener("visibilitychange", resume);
   const visibility = new IntersectionObserver(
     ([entry]) => {
@@ -726,6 +776,10 @@ export function createBalloonScene(
   const dispose = () => {
     disposed = true;
     document.removeEventListener("visibilitychange", resume);
+    window.removeEventListener("scroll", wakeUp);
+    window.removeEventListener("pointermove", wakeUp);
+    window.removeEventListener("pointerdown", wakeUp);
+    window.removeEventListener("resize", wakeUp);
     cancelAnimationFrame(animationFrameId);
     resizeObserver.disconnect();
     visibility.disconnect();

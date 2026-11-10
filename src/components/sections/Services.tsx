@@ -135,7 +135,7 @@ export default function Services() {
                 alt={services[i].title}
                 aria-hidden={active !== i}
                 className={active === i ? "is-active" : ""}
-                loading="eager"
+                loading={i === 0 ? "eager" : "lazy"}
                 decoding="async"
                 onError={(event) => {
                   const image = event.currentTarget;

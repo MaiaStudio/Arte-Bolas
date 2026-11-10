@@ -5,6 +5,15 @@ export default function BalloonScene({ onReady }: { onReady: () => void }) {
     canvas = useRef<HTMLCanvasElement>(null);
   const [color, setColor] = useState(palettes[0].color);
   const [fallback, setFallback] = useState(false);
+
+  useEffect(() => {
+    // Notify parent immediately on next frame so loader releases without delay
+    const frame = requestAnimationFrame(() => {
+      onReady();
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [onReady]);
+
   useEffect(() => {
     let disposed = false,
       epoch = 0,
@@ -31,31 +40,35 @@ export default function BalloonScene({ onReady }: { onReady: () => void }) {
         const mouse = { x: 99, y: 99, isDown: false };
         const update = () => {
           const ids = ["hero", "physics", "form", "release"];
-          const anchors = ids.map((id) => document.getElementById(id)!);
+          const anchors = ids.map((id) => document.getElementById(id));
+          if (!anchors[0]) return;
           const y = scrollY;
           let progress = 0;
           for (let i = 0; i < anchors.length; i++) {
-            const top = anchors[i].getBoundingClientRect().top + y;
+            const el = anchors[i];
+            if (!el) continue;
+            const top = el.getBoundingClientRect().top + y;
             const next = anchors[i + 1];
             const end = next
               ? next.getBoundingClientRect().top + y
-              : top + anchors[i].offsetHeight;
+              : top + el.offsetHeight;
             if (y >= top)
               progress =
                 i +
                 Math.min(1, Math.max(0, (y - top) / Math.max(1, end - top)));
           }
           control.progress = progress;
-          const r = document
-            .getElementById("release-reading-zone")!
-            .getBoundingClientRect();
-          const center = r.top + r.height / 2;
-          const d = Math.abs(center - innerHeight / 2) / innerHeight;
-          control.releaseFocus = 1 - Math.min(1, Math.max(0, (d - 0.1) / 0.46));
-          control.releaseCenterNormY = Math.max(
-            -0.85,
-            Math.min(0.85, 1 - (center / innerHeight) * 2),
-          );
+          const rZone = document.getElementById("release-reading-zone");
+          if (rZone) {
+            const r = rZone.getBoundingClientRect();
+            const center = r.top + r.height / 2;
+            const d = Math.abs(center - innerHeight / 2) / innerHeight;
+            control.releaseFocus = 1 - Math.min(1, Math.max(0, (d - 0.1) / 0.46));
+            control.releaseCenterNormY = Math.max(
+              -0.85,
+              Math.min(0.85, 1 - (center / innerHeight) * 2),
+            );
+          }
         };
         const move = (e: PointerEvent) => {
           const r = host.current!.getBoundingClientRect();
@@ -81,6 +94,19 @@ export default function BalloonScene({ onReady }: { onReady: () => void }) {
           update,
           onReady,
         );
+        let updateScheduled = false;
+        const onScrollOrResize = () => {
+          if (updateScheduled) return;
+          updateScheduled = true;
+          requestAnimationFrame(() => {
+            updateScheduled = false;
+            update();
+          });
+        };
+        window.addEventListener("scroll", onScrollOrResize, { passive: true });
+        window.addEventListener("resize", onScrollOrResize, { passive: true });
+        update();
+
         window.addEventListener("pointermove", move, { passive: true });
         window.addEventListener("pointerdown", down);
         window.addEventListener("pointerup", up);
@@ -88,6 +114,8 @@ export default function BalloonScene({ onReady }: { onReady: () => void }) {
         setFallback(false);
         cleanup = () => {
           destroy();
+          window.removeEventListener("scroll", onScrollOrResize);
+          window.removeEventListener("resize", onScrollOrResize);
           window.removeEventListener("pointermove", move);
           window.removeEventListener("pointerdown", down);
           window.removeEventListener("pointerup", up);
