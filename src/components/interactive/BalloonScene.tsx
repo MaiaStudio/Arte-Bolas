@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { palettes } from "../../data/content";
 export default function BalloonScene({ onReady }: { onReady: () => void }) {
   const host = useRef<HTMLDivElement>(null),
@@ -136,7 +136,36 @@ export default function BalloonScene({ onReady }: { onReady: () => void }) {
     };
     canvas.current?.addEventListener("webglcontextlost", lost);
     const currentCanvas = canvas.current;
-    start();
+    let started = false;
+    const runStart = () => {
+      if (started || disposed) return;
+      started = true;
+      start();
+    };
+
+    if (media.matches) {
+      runStart();
+    } else {
+      const userTriggers = [
+        "pointermove",
+        "scroll",
+        "wheel",
+        "touchstart",
+        "pointerdown",
+      ] as const;
+      userTriggers.forEach((evt) =>
+        window.addEventListener(evt, runStart, { once: true, passive: true }),
+      );
+
+      if (typeof requestIdleCallback === "function") {
+        setTimeout(() => {
+          requestIdleCallback(() => runStart());
+        }, 4500);
+      } else {
+        setTimeout(runStart, 30);
+      }
+    }
+
     media.addEventListener("change", start);
     return () => {
       disposed = true;

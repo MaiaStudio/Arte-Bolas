@@ -49,7 +49,7 @@ export function createBalloonScene(
   camera.position.set(0, 0, 11);
 
   const isMobile = window.innerWidth < 800;
-  const ballCount = isMobile ? 18 : window.innerWidth < 1024 ? 32 : 44;
+  const ballCount = isMobile ? 12 : window.innerWidth < 1024 ? 24 : 36;
 
   const renderer = new THREE.WebGLRenderer({
     canvas,
@@ -190,7 +190,9 @@ export function createBalloonScene(
     glass: new THREE.Color(),
   };
 
-  const sphereGeometry = new THREE.SphereGeometry(1, 28, 24);
+  const sphereGeometry = isMobile
+    ? new THREE.SphereGeometry(1, 16, 12)
+    : new THREE.SphereGeometry(1, 28, 24);
   const vertices = sphereGeometry.attributes.position;
   for (let i = 0; i < vertices.count; i++) {
     const y = vertices.getY(i);
@@ -218,7 +220,7 @@ export function createBalloonScene(
     let sphereMat;
     let role: PaletteRole = "medium";
 
-    const isGlass = Math.random() < 0.1 && !isBlack;
+    const isGlass = !isMobile && Math.random() < 0.1 && !isBlack;
 
     if (isGlass) {
       sphereMat = new THREE.MeshPhysicalMaterial({
@@ -256,16 +258,27 @@ export function createBalloonScene(
         role = "deep";
       }
 
-      sphereMat = new THREE.MeshPhysicalMaterial({
-        color: chosenColor,
-        roughness: 0.44,
-        metalness: 0.0,
-        clearcoat: 0.24,
-        clearcoatRoughness: 0.35,
-        emissive: isBlack ? new THREE.Color("#000000") : chosenColor,
-        emissiveIntensity: isBlack ? 0.0 : 0.08,
-        transparent: true,
-      });
+      if (isMobile) {
+        sphereMat = new THREE.MeshStandardMaterial({
+          color: chosenColor,
+          roughness: 0.38,
+          metalness: 0.04,
+          emissive: isBlack ? new THREE.Color("#000000") : chosenColor,
+          emissiveIntensity: isBlack ? 0.0 : 0.08,
+          transparent: true,
+        });
+      } else {
+        sphereMat = new THREE.MeshPhysicalMaterial({
+          color: chosenColor,
+          roughness: 0.44,
+          metalness: 0.0,
+          clearcoat: 0.24,
+          clearcoatRoughness: 0.35,
+          emissive: isBlack ? new THREE.Color("#000000") : chosenColor,
+          emissiveIntensity: isBlack ? 0.0 : 0.08,
+          transparent: true,
+        });
+      }
       color = chosenColor;
     }
 
@@ -305,7 +318,9 @@ export function createBalloonScene(
     return a * a * a - x * x * y * y * y <= 0;
   };
 
+  let heartTargetsAssigned = false;
   const assignHeartTargets = () => {
+    heartTargetsAssigned = true;
     const S = Math.min(viewportWidth * 0.3, viewportHeight * 0.27);
     const baseCY = -viewportHeight * 0.03;
     shapeScale = Math.max(0.3, Math.min(1, (S * 0.45) / 2.3 / meanRadius));
@@ -325,22 +340,44 @@ export function createBalloonScene(
       );
     }
   };
-  assignHeartTargets();
+  if (!isMobile) {
+    assignHeartTargets();
+  }
+
+  const initClusterPositions = () => {
+    const clusterRadius = isMobile ? 1.5 : 2.2;
+    for (let i = 0; i < balls.length; i++) {
+      const b = balls[i];
+      const phi = Math.acos(-1 + (2 * i) / balls.length);
+      const theta = Math.sqrt(balls.length * Math.PI) * phi;
+      const r = clusterRadius * Math.cbrt((i + 1) / balls.length);
+      const px = r * Math.sin(phi) * Math.cos(theta) * 1.15;
+      const py = r * Math.sin(phi) * Math.sin(theta) * 0.85;
+      const pz = r * Math.cos(phi) * 0.7;
+      b.position.set(px, py, pz);
+      b.velocity.set(0, 0, 0);
+      b.meshGroup.position.copy(b.position);
+    }
+  };
 
   const scatterFar = (withInwardVelocity: boolean) => {
-    const R = Math.max(viewportWidth, viewportHeight) * 1.5;
+    if (isMobile) {
+      initClusterPositions();
+      return;
+    }
+    const R = Math.max(viewportWidth, viewportHeight) * 1.2;
     for (const b of balls) {
       const a = Math.random() * Math.PI * 2;
-      const px = Math.cos(a) * R * 1.25;
-      const py = Math.sin(a) * R * 0.85;
-      const pz = (Math.random() - 0.5) * 4;
+      const px = Math.cos(a) * R * 0.9;
+      const py = Math.sin(a) * R * 0.7;
+      const pz = (Math.random() - 0.5) * 3;
       b.position.set(px, py, pz);
       b.meshGroup.position.copy(b.position);
       if (withInwardVelocity) {
         b.velocity
           .set(-px, -py, -pz)
           .normalize()
-          .multiplyScalar(0.08 + Math.random() * 0.05);
+          .multiplyScalar(0.06 + Math.random() * 0.04);
       } else {
         b.velocity.set(0, 0, 0);
       }
@@ -348,7 +385,9 @@ export function createBalloonScene(
   };
 
   // If control has already started, let them start inside, otherwise park far offscreen
-  if (control.started) {
+  if (isMobile) {
+    initClusterPositions();
+  } else if (control.started) {
     scatterFar(true);
   } else {
     scatterFar(false);
@@ -465,8 +504,10 @@ export function createBalloonScene(
     }
     hemiLight.groundColor.copy(curPal.medium);
 
-    const entranceT = easeOutCubic(clamp01((time - entranceStart) / 2.2));
-    const attractionBoost = lerp(7.5, 1, entranceT);
+    const entranceT = isMobile
+      ? 1.0
+      : easeOutCubic(clamp01((time - entranceStart) / 0.8));
+    const attractionBoost = isMobile ? 1 : lerp(4.0, 1, entranceT);
 
     const isMouseInteracting =
       !!mousePos &&
@@ -511,6 +552,7 @@ export function createBalloonScene(
       }
 
       if (shapeF > 0.001) {
+        if (!heartTargetsAssigned) assignHeartTargets();
         const k = 0.06 * shapeF;
         b.velocity.x += (b.shapeTarget.x - b.position.x) * k;
         b.velocity.y += (b.shapeTarget.y - b.position.y) * k;
@@ -702,6 +744,17 @@ export function createBalloonScene(
       onReady();
     }
 
+    // On mobile on load (hero phase at rest, no mouse/touch interaction):
+    // After rendering the cluster, let it sleep immediately.
+    // It wakes up instantly on scroll or pointermove/touchstart.
+    if (isMobile && progress === 0 && !isMouseInteracting && time > 0) {
+      settleFrames++;
+      if (settleFrames >= 2) {
+        animationFrameId = 0;
+        return;
+      }
+    }
+
     // Check if the simulation can sleep to save CPU and drop TBT to zero
     let maxSpeedSq = 0;
     for (let i = 0; i < balls.length; i++) {
@@ -714,11 +767,11 @@ export function createBalloonScene(
       entranceT >= 1 &&
       !isMouseInteracting &&
       heroF > 0.98 &&
-      maxSpeedSq < 0.0001;
+      maxSpeedSq < (isMobile ? 0.0005 : 0.0001);
 
     if (canSleep) {
       settleFrames++;
-      if (settleFrames > 20) {
+      if (settleFrames > (isMobile ? 2 : 15)) {
         animationFrameId = 0;
         return;
       }
@@ -748,6 +801,7 @@ export function createBalloonScene(
   window.addEventListener("scroll", wakeUp, { passive: true });
   window.addEventListener("pointermove", wakeUp, { passive: true });
   window.addEventListener("pointerdown", wakeUp, { passive: true });
+  window.addEventListener("touchstart", wakeUp, { passive: true });
   window.addEventListener("resize", wakeUp, { passive: true });
   document.addEventListener("visibilitychange", resume);
   const visibility = new IntersectionObserver(
@@ -767,7 +821,7 @@ export function createBalloonScene(
     camera.updateProjectionMatrix();
     renderer.setSize(width, height, false);
     updateFrustumBounds();
-    assignHeartTargets();
+    if (heartTargetsAssigned) assignHeartTargets();
   };
 
   const resizeObserver = new ResizeObserver(handleResize);
@@ -779,6 +833,7 @@ export function createBalloonScene(
     window.removeEventListener("scroll", wakeUp);
     window.removeEventListener("pointermove", wakeUp);
     window.removeEventListener("pointerdown", wakeUp);
+    window.removeEventListener("touchstart", wakeUp);
     window.removeEventListener("resize", wakeUp);
     cancelAnimationFrame(animationFrameId);
     resizeObserver.disconnect();
