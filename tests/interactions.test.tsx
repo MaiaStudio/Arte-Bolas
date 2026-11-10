@@ -178,6 +178,52 @@ describe("Acervo real", () => {
     expect(images[2].classList.contains("is-active")).toBe(false);
     expect(step1Link.getAttribute("aria-current")).toBe("step");
   });
+  it("sobrepõe os 3 cards de Serviços no mobile com o scroll na descida e reverte na volta", () => {
+    window.innerWidth = 390;
+    window.innerHeight = 800;
+    let tops = [80, 440, 1160]; // Card 1 fixado em 80px, Card 2 subindo na metade (overlap = 0.5)
+    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(
+      function (this: HTMLElement) {
+        const idx =
+          this.id === "servico-0"
+            ? 0
+            : this.id === "servico-1"
+              ? 1
+              : this.id === "servico-2"
+                ? 2
+                : -1;
+        const top = idx >= 0 ? tops[idx] : 0;
+        return {
+          top,
+          bottom: top + 720,
+          left: 0,
+          right: 390,
+          width: 390,
+          height: 720,
+          x: 0,
+          y: top,
+          toJSON: () => {},
+        } as DOMRect;
+      },
+    );
+
+    const { container } = render(<Services />);
+    const chapters = container.querySelectorAll<HTMLElement>(".service-chapter");
+    expect(chapters).toHaveLength(3);
+    // Card 1 está sendo sobreposto pelo Card 2 (metade do percurso -> scale ~0.975, opacity ~0.675)
+    expect(chapters[0].style.transform).toBe("scale(0.975)");
+    expect(Number(chapters[0].style.opacity)).toBeCloseTo(0.675, 2);
+    expect(chapters[1].style.transform).toBe("");
+
+    // Na volta (scroll para cima): Card 2 desce de volta para fora da tela (top = 820)
+    tops = [80, 820, 1540];
+    const { container: revertContainer } = render(<Services />);
+    const revertedChapters =
+      revertContainer.querySelectorAll<HTMLElement>(".service-chapter");
+    expect(revertedChapters[0].style.transform).toBe("");
+    expect(revertedChapters[0].style.opacity).toBe("");
+    window.innerWidth = 1024;
+  });
 });
 describe("Navegação e cena", () => {
   it("abre e fecha menu com Escape", () => {

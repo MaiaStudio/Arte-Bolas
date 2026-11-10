@@ -37,5 +37,16 @@ export default function BalloonCursor() {
     );
     return () => mm.revert();
   }, []);
-  return <div ref={root} className="balloon-cursor" aria-hidden="true" />;
+  return (
+    <div ref={root} className="balloon-cursor" aria-hidden="true">
+      <img
+        src="/baloes-cursor.svg"
+        alt=""
+        className="balloon-cursor-icon"
+        draggable={false}
+        width={30}
+        height={30}
+      />
+    </div>
+  );
 }

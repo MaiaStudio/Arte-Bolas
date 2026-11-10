@@ -5,7 +5,7 @@ export default function Hero() {
       <section id="hero" className="hero experience-section">
         <div className="hero-copy reading-zone">
           <div className="reading-veil" aria-hidden="true" />
-          <p className="eyebrow">ESTÚDIO CRIATIVO DE CENOGRAFIA · DESDE 1999</p>
+          <p className="eyebrow">ARTE COM BALÕES * DESDE 1999</p>
           <h1>
             Mais que
             <br />

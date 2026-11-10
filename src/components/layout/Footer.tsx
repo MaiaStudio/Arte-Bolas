@@ -1,4 +1,4 @@
-﻿import { brand } from "../../data/content";
+import { brand } from "../../data/content";
 export default function Footer() {
   return (
     <footer>
@@ -18,8 +18,17 @@ export default function Footer() {
         href="#hero"
         aria-label="Arte Bola — voltar ao início"
       >
-        <span>arte</span> <span>bola</span>
-        <i aria-hidden="true">✳</i>
+        <span className="footer-brand">
+          <span>arte</span> <span>bola</span>
+        </span>
+        <img
+          src="/baloes.svg"
+          alt=""
+          aria-hidden="true"
+          className="footer-balloon-icon"
+          width="160"
+          height="160"
+        />
       </a>
       <div className="footer-bottom">
         <span>

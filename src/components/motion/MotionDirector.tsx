@@ -86,24 +86,31 @@ export default function MotionDirector({ ready }: { ready: boolean }) {
             scrollTrigger: { trigger: el, start: "top 90%", once: true },
           }),
         );
-
-      gsap.utils
-        .toArray<HTMLElement>(".service-chapter")
-        .forEach((el) =>
-          gsap.from(el, {
-            y: 28,
-            opacity: 0,
-            duration: 0.72,
-            ease: "expo.out",
-            scrollTrigger: { trigger: el, start: "top 88%", once: true },
-          }),
-        );
     });
     mm.add(
       "(min-width: 800px) and (prefers-reduced-motion: no-preference)",
       () => {
-        const stage = document.querySelector<HTMLElement>(".manifesto-stage")!,
-          track = stage.querySelector<HTMLElement>(".manifesto-track")!;
+        gsap.utils
+          .toArray<HTMLElement>(".service-chapter")
+          .forEach((el) =>
+            gsap.from(el, {
+              y: 28,
+              opacity: 0,
+              duration: 0.72,
+              ease: "expo.out",
+              scrollTrigger: { trigger: el, start: "top 88%", once: true },
+            }),
+          );
+      },
+    );
+
+    mm.add(
+      "(prefers-reduced-motion: no-preference)",
+      () => {
+        const stage = document.querySelector<HTMLElement>(".manifesto-stage");
+        const track = stage?.querySelector<HTMLElement>(".manifesto-track");
+        if (!stage || !track) return;
+
         const distance = () =>
           Math.max(0, track.scrollWidth - stage.clientWidth);
         const tl = gsap.timeline({

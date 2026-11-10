@@ -16,7 +16,6 @@ export default function Services() {
 
     const update = () => {
       if (!root.current) return;
-      if (typeof window !== "undefined" && window.innerWidth < 800) return;
 
       const chapters = Array.from(
         root.current.querySelectorAll<HTMLElement>(".service-chapter"),
@@ -24,6 +23,52 @@ export default function Services() {
       if (!chapters.length) return;
 
       const vh = window.innerHeight || 800;
+      const isMobile =
+        typeof window !== "undefined" && window.innerWidth < 800;
+
+      if (isMobile) {
+        const stickyTop = 80;
+        const travel = Math.max(1, vh - stickyTop);
+        let next = 0;
+
+        chapters.forEach((el, i) => {
+          const rect = el.getBoundingClientRect();
+          if (rect.top <= vh * 0.55) {
+            next = i;
+          }
+
+          const nextChapter = chapters[i + 1];
+          if (nextChapter) {
+            const nextTop = nextChapter.getBoundingClientRect().top;
+            const overlap = Math.min(1, Math.max(0, (vh - nextTop) / travel));
+            if (overlap > 0) {
+              const scale = 1 - overlap * 0.05;
+              const opacity = overlap >= 0.98 ? 0 : 1 - overlap * 0.65;
+              el.style.transform = `scale(${scale.toFixed(4)})`;
+              el.style.opacity = String(Number(opacity.toFixed(3)));
+              el.style.pointerEvents = overlap > 0.6 ? "none" : "";
+            } else {
+              el.style.transform = "";
+              el.style.opacity = "";
+              el.style.pointerEvents = "";
+            }
+          } else {
+            el.style.transform = "";
+            el.style.opacity = "";
+            el.style.pointerEvents = "";
+          }
+        });
+
+        setActive((prev) => (prev !== next ? next : prev));
+        return;
+      }
+
+      chapters.forEach((el) => {
+        el.style.transform = "";
+        el.style.opacity = "";
+        el.style.pointerEvents = "";
+      });
+
       const targetLine = vh * 0.52;
 
       let next = 0;
@@ -129,7 +174,7 @@ export default function Services() {
             ))}
           </nav>
         </div>
-        <div>
+        <div className="service-chapters">
           {services.map((s, i) => (
             <article
               className="service-chapter"
