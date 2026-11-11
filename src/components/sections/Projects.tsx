@@ -1,7 +1,9 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { categories, projects, type Project } from "../../data/projects";
 import ProjectCard from "../interactive/ProjectCard";
 import ProjectGallery from "../interactive/ProjectGallery";
+import SplitText from "../ui/SplitText";
+
 export default function Projects() {
   const [category, setCategory] = useState("Todos");
   const [selected, setSelected] = useState<Project | null>(null);
@@ -10,16 +12,23 @@ export default function Projects() {
   );
   return (
     <section id="projetos" className="projects section-pad">
-      <div className="section-heading split-heading" data-reveal>
+      <div className="section-heading split-heading">
         <div>
-          <p className="eyebrow">PORTFÓLIO / IDEIAS QUE ACONTECERAM</p>
-          <h2>
+          <p className="eyebrow" data-reveal>PORTFÓLIO / IDEIAS QUE ACONTECERAM</p>
+          <SplitText
+            tag="h2"
+            textAlign="left"
+            effect="rise"
+            splitType="words, chars"
+            delay={25}
+            duration={0.9}
+          >
             O que a gente
             <br />
             <em>coloca no mundo.</em>
-          </h2>
+          </SplitText>
         </div>
-        <p>
+        <p data-reveal>
           Fotografias reais. Histórias singulares.
           <br />
           Explore as cores, os detalhes

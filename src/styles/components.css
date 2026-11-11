@@ -414,6 +414,8 @@
 }
 .release h2 {
   font-size: clamp(62px, 8.8vw, 136px);
+  overflow: visible !important;
+  padding-bottom: 0.15em;
 }
 .release .text-link {
   margin-top: 26px;
@@ -978,10 +980,18 @@
   border-top: 3px solid var(--ink);
   border-bottom: 3px solid var(--ink);
 }
+.final-cta-heading-wrap {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 30px;
+}
 .final-cta h2 {
   font-size: clamp(76px, 11.5vw, 184px);
   line-height: 0.9;
   position: relative;
+  flex: 1;
 }
 .final-cta h2 em {
   background: none;
@@ -989,12 +999,39 @@
   color: var(--blue);
   text-shadow: 4px 4px 0 #ffffff;
 }
-.final-cta h2 > span {
-  position: absolute;
-  right: 0;
-  top: 0;
+.final-cta-badge {
+  position: relative;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  color: var(--ink);
+  margin-top: 10px;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.final-cta-badge:hover {
+  transform: scale(1.06);
+}
+.final-cta-circular {
+  font-family: "Space Grotesk", sans-serif;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.final-cta-badge-arrow {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 52px;
   font-weight: 700;
   color: var(--blue);
+  line-height: 1;
+  display: inline-block;
+  pointer-events: none;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.final-cta-badge:hover .final-cta-badge-arrow {
+  transform: translate(4px, -4px);
 }
 .final-cta > div {
   display: flex;
@@ -1423,11 +1460,20 @@ footer {
   .process-grid p {
     margin-top: 15px;
   }
+  .final-cta-heading-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
   .final-cta h2 {
     font-size: clamp(56px, 13vw, 100px);
   }
-  .final-cta h2 > span {
-    font-size: 0.6em;
+  .final-cta-badge {
+    align-self: flex-start;
+    margin-top: 10px;
+    transform: scale(0.85);
+    transform-origin: left top;
   }
   .final-cta > div {
     display: block;
@@ -1506,4 +1552,40 @@ footer {
   .manifesto-progress {
     display: none !important;
   }
+}
+
+/* React Bits SplitText Integration */
+.split-parent {
+  display: block;
+  width: 100%;
+  position: relative;
+  max-width: 100%;
+  overflow: visible !important;
+  padding-bottom: 0.12em;
+}
+h1.split-parent,
+h2.split-parent,
+h3.split-parent,
+h4.split-parent,
+h5.split-parent,
+h6.split-parent {
+  display: block !important;
+  width: 100% !important;
+  clear: both;
+  overflow: visible !important;
+  padding-bottom: 0.12em;
+}
+.split-line {
+  display: block !important;
+  position: relative;
+}
+.split-word {
+  display: inline-block !important;
+  position: relative;
+  white-space: nowrap;
+}
+.split-char {
+  display: inline-block !important;
+  position: relative;
+  will-change: transform, opacity;
 }

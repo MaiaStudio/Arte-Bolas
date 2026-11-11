@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { services, brand } from "../../data/content";
 import { projects } from "../../data/projects";
 import PhotoImage from "../interactive/PhotoImage";
+import SplitText from "../ui/SplitText";
 
 const photos = services.map(
   (s) => projects.find((p) => p.id === s.project)!.photos[0],
@@ -113,13 +114,20 @@ export default function Services() {
 
   return (
     <section ref={root} id="servicos" className="services section-pad">
-      <div className="section-heading" data-reveal>
-        <p className="eyebrow">O QUE PODEMOS CRIAR JUNTOS</p>
-        <h2>
+      <div className="section-heading">
+        <p className="eyebrow" data-reveal>O QUE PODEMOS CRIAR JUNTOS</p>
+        <SplitText
+          tag="h2"
+          textAlign="left"
+          effect="rise"
+          splitType="words, chars"
+          delay={25}
+          duration={0.9}
+        >
           Seu universo.
           <br />
           <em>Novas possibilidades.</em>
-        </h2>
+        </SplitText>
       </div>
       <div className="service-story">
         <div className="service-visual">

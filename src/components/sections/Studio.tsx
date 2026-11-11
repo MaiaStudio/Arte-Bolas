@@ -2,6 +2,8 @@ import { useEffect, useRef } from "react";
 import { brand } from "../../data/content";
 import { projects } from "../../data/projects";
 import PhotoImage from "../interactive/PhotoImage";
+import SplitText from "../ui/SplitText";
+import CircularText from "../ui/CircularText";
 export function About() {
   return (
     <section id="sobre" className="about section-pad">
@@ -11,23 +13,30 @@ export function About() {
           alt="Detalhe da escala de uma instalação de laço vermelho da Arte Bola"
         />
       </div>
-      <div data-reveal>
-        <p className="eyebrow">ARTE BOLA / FORTALEZA, CEARÁ</p>
-        <h2>
+      <div>
+        <p className="eyebrow" data-reveal>ARTE BOLA / FORTALEZA, CEARÁ</p>
+        <SplitText
+          tag="h2"
+          textAlign="left"
+          effect="rise"
+          splitType="words, chars"
+          delay={25}
+          duration={0.9}
+        >
           O olhar é criativo.
           <br />
           <em>O fazer é artesanal.</em>
-        </h2>
-        <p>
+        </SplitText>
+        <p data-reveal>
           Desde 1999, transformamos balões em instalações artísticas, cenários e
           experiências visuais marcantes.
         </p>
-        <p>
+        <p data-reveal>
           Nosso ponto de partida é a imaginação. Nosso trabalho é encontrar a
           cor, a forma e a proporção que fazem sentido para cada espaço e cada
           celebração.
         </p>
-        <span className="about-signature">
+        <span className="about-signature" data-reveal>
           Desde 1999, dando forma à imaginação.
         </span>
       </div>
@@ -136,13 +145,20 @@ export function Process() {
 
   return (
     <section id="processo" className="process section-pad">
-      <div className="section-heading" data-reveal>
-        <p className="eyebrow">DA PRIMEIRA CONVERSA AO GRANDE DIA</p>
-        <h2>
+      <div className="section-heading">
+        <p className="eyebrow" data-reveal>DA PRIMEIRA CONVERSA AO GRANDE DIA</p>
+        <SplitText
+          tag="h2"
+          textAlign="left"
+          effect="rise"
+          splitType="words, chars"
+          delay={25}
+          duration={0.9}
+        >
           Uma ideia sua.
           <br />
           <em>Uma criação nossa.</em>
-        </h2>
+        </SplitText>
       </div>
       <div ref={gridRef} className="process-grid">
         {[
@@ -183,14 +199,46 @@ export function Process() {
 export function FinalCTA() {
   return (
     <section id="contato" className="final-cta section-pad">
-      <p className="eyebrow">A PRÓXIMA HISTÓRIA PODE SER A SUA</p>
-      <h2>
-        Vamos fazer
-        <br />
-        <em>acontecer?</em>
-        <span aria-hidden="true">↗</span>
-      </h2>
-      <div>
+      <p className="eyebrow" data-reveal>A PRÓXIMA HISTÓRIA PODE SER A SUA</p>
+      <div className="final-cta-heading-wrap">
+        <SplitText
+          tag="h2"
+          textAlign="left"
+          effect="rise"
+          splitType="words, chars"
+          delay={25}
+          duration={0.9}
+        >
+          Vamos fazer
+          <br />
+          <em>acontecer?</em>
+        </SplitText>
+        <a
+          className="final-cta-badge"
+          href={brand.contact}
+          target="_blank"
+          rel="noreferrer"
+          aria-label="Quero minha Arte Bola"
+        >
+          <CircularText
+            text="Quero minha Arte Bola • "
+            onHover="speedUp"
+            direction="clockwise"
+            spinDuration={20}
+            size={180}
+            fontSize={13}
+            fontWeight={800}
+            draggable
+            hoverTilt={18}
+            className="final-cta-circular"
+          >
+            <span className="final-cta-badge-arrow" aria-hidden="true">
+              ↗
+            </span>
+          </CircularText>
+        </a>
+      </div>
+      <div data-reveal>
         <p>Traga sua ideia. A gente imagina junto.</p>
         <a
           className="button"

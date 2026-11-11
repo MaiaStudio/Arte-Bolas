@@ -312,3 +312,4 @@ Use este checklist antes de rodar o Lighthouse final:
   - [ ] Imagens com atributos explícitos `width` e `height` para evitar CLS.
   - [ ] Formatos modernos de imagem (`.webp` ou `.avif`).
   - [ ] Fontes do Google carregadas com `preconnect` e `media="print"` assíncrono.
+

@@ -1,19 +1,28 @@
-﻿import { projects } from "../../data/projects";
+import { projects } from "../../data/projects";
 import PhotoImage from "../interactive/PhotoImage";
+import SplitText from "../ui/SplitText";
+
 export default function Manifesto() {
   const selection = ["540428866", "laco-vermelho", "810659443"].map((id) =>
     projects.find((p) => p.id === id)!,
   );
   return (
     <section id="manifesto" className="manifesto">
-      <div className="section-heading" data-reveal>
-        <p className="eyebrow">NOSSA FORMA DE VER O MUNDO</p>
-        <h2>
+      <div className="section-heading">
+        <p className="eyebrow" data-reveal>NOSSA FORMA DE VER O MUNDO</p>
+        <SplitText
+          tag="h2"
+          textAlign="left"
+          effect="rise"
+          splitType="words, chars"
+          delay={25}
+          duration={0.9}
+        >
           O extraordinário
           <br />
           está em <em>dar forma.</em>
-        </h2>
-        <p>
+        </SplitText>
+        <p data-reveal>
           Da delicadeza de um detalhe à presença de uma grande instalação.
           <br />A nossa linguagem é feita de possibilidades.
         </p>

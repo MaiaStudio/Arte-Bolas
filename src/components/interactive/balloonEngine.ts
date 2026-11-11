@@ -9,7 +9,7 @@ interface BalloonBody {
   velocity: THREE.Vector3;
   meshGroup: THREE.Group;
   sphere: THREE.Mesh;
-  material: THREE.MeshPhysicalMaterial;
+  material: THREE.MeshPhysicalMaterial | THREE.MeshStandardMaterial;
   role: PaletteRole;
   isGlass: boolean;
   visualScale: number;
